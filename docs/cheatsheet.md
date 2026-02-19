@@ -9,14 +9,25 @@ python3 neslang.py game.nsl -o game.nes
 ```c
 byte x = 10;           // zero-page (fast, ~200 bytes)
 byte[20] arr;          // ZP array
+byte[3] d = { 0, 1, SPEED };  // array init (expressions allowed)
 const byte N = 5;      // constant
 ram byte y = 0;        // RAM $0300+ (slower, 1280 bytes)
 ram byte[200] map;     // large arrays go here!
 ```
 
+## Operators
+```c
++  -  *              // arithmetic (no divide)
+==  !=  <  >  <=  >= // comparison (unsigned)
+&  ^  |              // bitwise AND, XOR, OR
+~x                   // bitwise NOT (~x == x ^ 255)
+!x                   // logical NOT (!0 == 1, !n == 0)
+0 - x                // negation (no unary minus)
+```
+
 ## Tile (8x8 pixels)
 ```c
-tile 16 = "            // .=transparent X=color1 O=color2 #=color3
+tile 16 = "            // .=color0 X/1=color1 O/2=color2 #/3=color3
 ..XXXX..
 .XXXXXX.
 XX#XX#XX
@@ -63,8 +74,8 @@ hide_sprite(id);
 
 ## Input
 ```c
-byte pad = gamepad(0);                // read controller
-byte pressed = pad & (old_pad ^ 255); // edge detect
+byte pad = gamepad(0);           // read controller
+byte pressed = pad & ~old_pad;   // edge detect (new presses only)
 old_pad = pad;
 // BTN_A BTN_B BTN_UP BTN_DOWN BTN_LEFT BTN_RIGHT BTN_START BTN_SELECT
 ```
@@ -119,3 +130,4 @@ func main() {
 7. ~200 bytes zero-page for `byte` variables
 8. ~1280 bytes RAM for `ram byte` variables
 9. Use `ram` for large arrays (>16 bytes)
+10. `true` = 1, `false` = 0 (usable anywhere as expressions)
