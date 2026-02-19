@@ -61,6 +61,13 @@ ram byte[240] tilemap;    // level data — RAM (too big for ZP!)
 ram byte[64] enemy_hp;    // 64 enemies — RAM
 ```
 
+Array initializers support full expressions, not just number literals:
+
+```c
+byte[4] data = { 1, 2, 3, 4 };           // literal values
+byte[3] dirs = { 0, SPEED, 0 - SPEED };  // expressions and constants allowed
+```
+
 ## Functions
 
 ```c
@@ -80,17 +87,34 @@ func main() {
 
 ## Operators
 
+### Binary Operators
+
+Listed from highest to lowest precedence:
+
 | Operator | Description |
 |----------|-------------|
-| `+` `-` | Addition, subtraction |
 | `*` | Multiplication (8-bit, result 0–255) |
+| `+` `-` | Addition, subtraction |
+| `<` `>` `<=` `>=` | Comparison (unsigned) |
+| `==` `!=` | Equality |
 | `&` | Bitwise AND |
 | `^` | Bitwise XOR |
-| `==` `!=` | Equality |
-| `<` `>` `<=` `>=` | Comparison |
-| `0 - x` | Negation (no unary minus) |
+| `\|` | Bitwise OR |
 
-**Note:** No divide or shift operators. Use lookup tables or repeated subtraction.
+### Unary Operators
+
+| Operator | Description |
+|----------|-------------|
+| `~` | Bitwise NOT (flips all 8 bits: `~x` is equivalent to `x ^ 255`) |
+| `!` | Logical NOT (`!0` = 1, `!anything_else` = 0) |
+
+**Note:** No unary minus, divide, or shift operators. Use `0 - x` for negation. Use lookup tables or repeated subtraction for division.
+
+```c
+byte mask = flags | BTN_A;          // set a bit with OR
+byte inverted = ~pad;               // flip all bits
+byte not_pressing = !(pad & BTN_A); // 1 if not pressed, 0 if pressed
+```
 
 ## Control Flow
 
@@ -110,16 +134,28 @@ while (true) {
 }
 ```
 
+### Boolean Literals
+
+`true` and `false` are built-in keywords that evaluate to `1` and `0` respectively. They can be used in any expression context, not just loop conditions:
+
+```c
+byte alive = true;      // same as byte alive = 1;
+byte game_over = false;  // same as byte game_over = 0;
+if (alive) { ... }       // any nonzero value is truthy
+```
+
 ## Tile Definitions
 
 Define 8×8 pixel tiles using visual ASCII art. Each tile uses a 4-character palette:
 
-| Char | Color Index | Typical Use |
-|------|-------------|-------------|
-| `.` | 0 | Background / transparent |
-| `X` | 1 | Outline / dark |
-| `O` | 2 | Main color |
-| `#` | 3 | Highlight / skin |
+| Char | Alternate | Color Index | Typical Use |
+|------|-----------|-------------|-------------|
+| `.` | | 0 | Background / transparent |
+| `X` | `1` | 1 | Outline / dark |
+| `O` | `2` | 2 | Main color |
+| `#` | `3` | 3 | Highlight / skin |
+
+You can use numeric characters `1`, `2`, `3` instead of `X`, `O`, `#` if you prefer. Any unrecognized character defaults to color 0.
 
 ```c
 tile 1 = "
@@ -252,7 +288,7 @@ BTN_UP      BTN_DOWN    BTN_LEFT     BTN_RIGHT
 **Edge detection** (single press, not held):
 
 ```c
-byte pressed = pad & (old_pad ^ 255);
+byte pressed = pad & ~old_pad;   // new presses this frame
 old_pad = pad;
 if (pressed & BTN_A) { /* just pressed */ }
 ```
@@ -388,6 +424,10 @@ Built-in 8×8 monospace font covering space (32), `!` through `/` (33–47), `0`
 - Horizontal mirroring
 - No battery-backed RAM
 - Compatible with all NES emulators
+
+### Auto-Loop Safety Net
+
+If `main()` runs to its end without an explicit infinite loop, the compiler automatically inserts a jump back to the start of `main()`. This prevents the CPU from executing garbage memory. However, you should always write an explicit `while (true) { ... }` loop — the auto-loop is a safety net, not a substitute for proper game loop design.
 
 ---
 

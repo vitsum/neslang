@@ -450,7 +450,7 @@ BUILTINS_CONST = {
 BUILTIN_FUNCS = {
     'vblank', 'gamepad', 'sprite', 'hide_sprite',
     'ppu_on', 'ppu_off', 'color', 'scroll', 'play_note', 'noise',
-    'set_tile', 'rand', 'enable_sound', 'silence',
+    'rand', 'enable_sound', 'silence',
     'bg_addr', 'bg_byte', 'bg_fill', 'bg_text', 'bg_attr',
     'sfx_pickup', 'sfx_hit', 'sfx_jump', 'sfx_explode',
     'music_init', 'music_tick',
