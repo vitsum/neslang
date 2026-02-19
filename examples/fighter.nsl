@@ -1,0 +1,1254 @@
+// =============================================
+//   S T R E E T   F U R Y   - DELUXE
+//   NES Beat-em-up / Detailed pixel art
+//
+//   Palette plan:
+//   SP0 player: X=0x02 dk blue  O=0x16 red     #=0x36 skin
+//   SP1 enemy:  X=0x18 dk olive O=0x2A green    #=0x36 skin
+//   SP2 fx/hud: X=0x06 dk red   O=0x27 orange   #=0x30 white
+//   SP3 boss:   X=0x08 dk brown O=0x28 yellow   #=0x36 skin
+//
+//   D-PAD=move  A=punch  B=kick  UP=jump  START=go
+// =============================================
+
+// ===== PLAYER HEAD =====
+tile 91 = "
+..XXXX..
+.XXXXXX.
+XX#XX#XX
+X######X
+X##XX##X
+.X#..#X.
+..X##X..
+...OO...
+";
+
+// ===== PLAYER BODY IDLE =====
+tile 92 = "
+..XOOX..
+.XOOOOX.
+XOOOOOOX
+XOOXXOOX
+.XOOOOX.
+..XOOX..
+.##XOXX.
+.XX..XX.
+";
+
+// ===== PLAYER LEGS IDLE =====
+tile 93 = "
+..XOOX..
+..XOOX..
+..XO.OX.
+..XO.OX.
+..XX.XX.
+.X#OX#OX
+.X#OX#OX
+..XX.XX.
+";
+
+// ===== PLAYER PUNCH BODY =====
+tile 94 = "
+..XOOX..
+.XOOOOX.
+XOOOOO##
+XOOXXO##
+.XOOOOXX
+..XOOX..
+..XOOX..
+..X..X..
+";
+
+// ===== PLAYER KICK BODY =====
+tile 95 = "
+..XOOX..
+.XOOOOX.
+XOOOOOOX
+XOOXXOOX
+.XOOOOX.
+..XOOX..
+.#XO....
+.#XOXXXX
+";
+
+// ===== PLAYER KICK FOOT =====
+tile 96 = "
+..XX....
+.XOOX...
+.XOOXOOX
+.XXXXOOX
+.......X
+........
+........
+........
+";
+
+// ===== PLAYER JUMP =====
+tile 97 = "
+..XOOX..
+.XOOOOX.
+XOOOOOOX
+XOOXXOOX
+.XOOOOX.
+..XOOX..
+..XOOX..
+.XX..XX.
+";
+
+// ===== PLAYER JUMP LEGS =====
+tile 98 = "
+.XO..OX.
+.XO..OX.
+..X..X..
+.XOOXOOX
+.XOOXOOX
+..XX.XX.
+........
+........
+";
+
+// ===== PLAYER HURT HEAD =====
+tile 99 = "
+..XXXX..
+.XXXXXX.
+XX.XX.XX
+X##XX##X
+X#.XX.#X
+.X####X.
+..X##X..
+...OO...
+";
+
+// ===== PLAYER HURT BODY =====
+tile 100 = "
+..XOOX..
+.XOOOOX.
+..XOOOOX
+..XOXXOX
+.XOOOOX.
+..XOOX..
+..XOOX..
+..X..X..
+";
+
+// ===== ENEMY HEAD (mohawk) =====
+tile 101 = "
+.X.XX.X.
+XXXXXXXX
+XXXX#XXX
+X.##.##X
+X######X
+.X#..#X.
+..X##X..
+..XOOX..
+";
+
+// ===== ENEMY BODY =====
+tile 102 = "
+.XOOOOX.
+XOOOOOOX
+XOOOOOOX
+XOOXXOOX
+.XOOOOX.
+..XOOX..
+.##XOXX.
+.XX..XX.
+";
+
+// ===== ENEMY LEGS =====
+tile 103 = "
+..XOOX..
+..XOOX..
+..XO.OX.
+..XO.OX.
+..XX.XX.
+.XOOXOOX
+.XOOXOOX
+..XX.XX.
+";
+
+// ===== ENEMY ATTACK BODY =====
+tile 104 = "
+.XOOOOX.
+XOOOOO##
+XOOOOO##
+XOOXXOXX
+.XOOOOX.
+..XOOX..
+..XOOX..
+..X..X..
+";
+
+// ===== BOSS HEAD =====
+tile 105 = "
+XXXXXXXX
+X##XX##X
+X.####.X
+X######X
+XX#OO#XX
+.X####X.
+..X##X..
+..XOOX..
+";
+
+// ===== BOSS BODY (wide/muscular) =====
+tile 106 = "
+.XOOOOX.
+#OOOOOOX
+#OOOOOOX
+XOOOOOOX
+XOOXXOOX
+XOOOOOOX
+.XOOOOX.
+.XX##XX.
+";
+
+// ===== BOSS LEGS =====
+tile 107 = "
+.XOOOOX.
+.XOOOOX.
+.XOO.OOX
+.XOO.OOX
+.XXX.XXX
+XOOX.OOX
+XOOX.OOX
+.XX...XX
+";
+
+// ===== BOSS ATTACK BODY =====
+tile 108 = "
+.XOOOOX.
+XOOOOO##
+XOOOOO##
+XOOOOXX#
+XOOXXOXX
+XOOOOOOX
+.XOOOOX.
+.XX..XX.
+";
+
+// ===== POW EFFECT =====
+tile 109 = "
+X..OO..X
+.XOOOOX.
+.OO##OO.
+OO####OO
+OO####OO
+.OO##OO.
+.XOOOOX.
+X..OO..X
+";
+
+// ===== HIT SPARKS =====
+tile 110 = "
+..X...X.
+.X#..#..
+..##.X..
+.#..#.#.
+..#..##.
+..#..#X.
+.X...X..
+........
+";
+
+// ===== BIG EXPLOSION =====
+tile 111 = "
+..XOOX..
+.X#OO#X.
+X#OOOO#X
+OO####OO
+OO####OO
+X#OOOO#X
+.X#OO#X.
+..XOOX..
+";
+
+// ===== HEALTH BAR FULL =====
+tile 112 = "
+XXXXXXXX
+X######X
+X######X
+X######X
+X######X
+X######X
+XXXXXXXX
+........
+";
+
+// ===== HEALTH BAR EMPTY =====
+tile 113 = "
+XXXXXXXX
+X......X
+X......X
+X......X
+X......X
+X......X
+XXXXXXXX
+........
+";
+
+// ===== BRICK WALL DETAILED =====
+tile 114 = "
+XOOOOXOO
+X#OO#X#O
+XXXXXXXX
+OOXOOOOX
+OO#OOOO#
+XXXXXXXX
+XOOOOXOO
+X#OO#X#O
+";
+
+// ===== WINDOW LIT (warm glow) =====
+tile 115 = "
+XXXXXXXX
+X.O##O.X
+X.#OO#.X
+X.OOOO.X
+X.#OO#.X
+X.O##O.X
+X......X
+XXXXXXXX
+";
+
+// ===== WINDOW DARK =====
+tile 116 = "
+XXXXXXXX
+X......X
+X..XX..X
+X..XX..X
+X..XX..X
+X......X
+X......X
+XXXXXXXX
+";
+
+// ===== GROUND SIDEWALK =====
+tile 117 = "
+XXXXXXXX
+O##O##O#
+#OO#OO#O
+XXXXXXXX
+XXXXXXXX
+#O##O##O
+O#OO#OO#
+XXXXXXXX
+";
+
+// ===== STREET ASPHALT =====
+tile 118 = "
+........
+..X.....
+........
+.......X
+........
+....X...
+........
+........
+";
+
+// ===== STREETLIGHT TOP =====
+tile 119 = "
+..XOOX..
+.X#OO#X.
+..XOOX..
+...XX...
+...XX...
+...XX...
+...XX...
+...XX...
+";
+
+// ===== STREETLIGHT POLE =====
+tile 120 = "
+...XX...
+...XX...
+...XX...
+...XX...
+...XX...
+...XX...
+...XX...
+...XX...
+";
+
+// ===== DOOR =====
+tile 121 = "
+XXXXXXXX
+X.OOOO.X
+X.OOOO.X
+X.OOOO.X
+X.OO#O.X
+X.OOOO.X
+X.OOOO.X
+XXXXXXXX
+";
+
+// ===== ROOF EDGE =====
+tile 122 = "
+XXXXXXXX
+X#O##O#X
+XXXXXXXX
+........
+........
+........
+........
+........
+";
+
+// ===== BAR SIGN =====
+tile 123 = "
+XXXXXXXX
+X.O##O.X
+X.O..O.X
+X.O##..X
+X.O..O.X
+X.O##O.X
+XXXXXXXX
+........
+";
+
+// ===== TRASH CAN =====
+tile 124 = "
+..XXXX..
+.XOOOOX.
+.XOXXOX.
+.XOOOOX.
+.XOXXOX.
+.XOOOOX.
+..XXXX..
+...XX...
+";
+
+// ===== DUMPSTER =====
+tile 125 = "
+XXXXXXXX
+XOOOOOOX
+XOXXOOOX
+XOOOXXOX
+XOOOOOOX
+XXXXXXXX
+.XX..XX.
+........
+";
+
+// ===== MOON =====
+tile 126 = "
+...###..
+..####..
+.#####..
+.#####..
+.#####..
+..####..
+...###..
+........
+";
+
+// ===== STAR SKY =====
+tile 127 = "
+........
+.#......
+........
+......#.
+...#....
+........
+........
+.....#..
+";
+
+// ===== NEON SIGN PIECE =====
+tile 128 = "
+XXXXXXXX
+X#O##O#X
+X#OOOO#X
+X#O##O#X
+XXXXXXXX
+........
+........
+........
+";
+
+// ===== CONSTANTS =====
+const byte H_LINE = 1;
+const byte V_LINE = 2;
+const byte TL = 3;
+const byte TR = 4;
+const byte BL = 5;
+const byte BR = 6;
+
+const byte PH = 91;
+const byte PB_I = 92;
+const byte PL_I = 93;
+const byte PB_P = 94;
+const byte PB_K = 95;
+const byte PF_K = 96;
+const byte PB_J = 97;
+const byte PL_J = 98;
+const byte PH_H = 99;
+const byte PB_H = 100;
+
+const byte EH = 101;
+const byte EB = 102;
+const byte ELE = 103;
+const byte EA = 104;
+
+const byte BHD = 105;
+const byte BBD = 106;
+const byte BLG = 107;
+const byte BAT = 108;
+
+const byte POW = 109;
+const byte SPARKS = 110;
+const byte BOOM = 111;
+
+const byte HP_F = 112;
+const byte HP_E = 113;
+
+const byte BWALL = 114;
+const byte W_LIT = 115;
+const byte W_DRK = 116;
+const byte GRND = 117;
+const byte STRT = 118;
+const byte LMP_T = 119;
+const byte LMP_P = 120;
+const byte DOOR = 121;
+const byte ROOF = 122;
+const byte SIGN = 123;
+const byte TRSH = 124;
+const byte DUMP = 125;
+const byte MOON = 126;
+const byte STARS = 127;
+const byte NEON = 128;
+
+const byte MAX_EN = 4;
+
+// ===== VARIABLES =====
+byte mode = 0;
+byte frame = 0;
+byte anim_frame = 0;
+byte old_pad = 0;
+
+byte px = 80;
+byte py = 168;
+byte p_dir = 0;
+byte p_state = 0;
+byte p_hp = 8;
+byte p_iframes = 0;
+byte p_jump_y = 0;
+byte p_jumping = 0;
+byte p_jump_vel = 0;
+byte p_atk_timer = 0;
+byte p_combo = 0;
+byte p_lives = 3;
+
+byte[4] en_x;
+byte[4] en_y;
+byte[4] en_hp;
+byte[4] en_dir;
+byte[4] en_state;
+byte[4] en_timer;
+byte[4] en_type;
+
+byte wave = 1;
+byte enemies_left = 0;
+byte enemies_alive = 0;
+byte spawn_timer = 0;
+byte spawn_count = 0;
+byte score_lo = 0;
+byte shake = 0;
+byte hit_x = 0;
+byte hit_y = 0;
+byte hit_timer = 0;
+
+// ============ BACKGROUND ============
+
+func clear_all() {
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) {
+        bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0);
+        j = j + 1;
+    }
+}
+
+func draw_street() {
+    // Sky with stars (rows 4-5)
+    bg_addr(2, 4); bg_byte(STARS);
+    bg_addr(6, 3); bg_byte(STARS);
+    bg_addr(10, 4); bg_byte(STARS);
+    bg_addr(14, 3); bg_byte(STARS);
+    bg_addr(18, 4); bg_byte(STARS);
+    bg_addr(22, 3); bg_byte(STARS);
+    bg_addr(26, 4); bg_byte(STARS);
+
+    // Moon
+    bg_addr(12, 3); bg_byte(MOON);
+
+    // ---- ROOFTOPS ----
+    byte rx = 0;
+    while (rx < 6) { bg_addr(rx, 6); bg_byte(ROOF); rx = rx + 1; }
+    rx = 26;
+    while (rx < 32) { bg_addr(rx, 6); bg_byte(ROOF); rx = rx + 1; }
+
+    // Neon sign on left building
+    bg_addr(1, 7); bg_byte(NEON);
+    bg_addr(2, 7); bg_byte(SIGN);
+    bg_addr(3, 7); bg_byte(NEON);
+
+    // ---- LEFT BUILDING ----
+    byte r = 7;
+    while (r < 21) {
+        byte c = 0;
+        while (c < 6) { bg_addr(c, r); bg_byte(BWALL); c = c + 1; }
+        r = r + 1;
+    }
+    // Windows (2 columns alternating lit/dark for life)
+    bg_addr(1, 9);  bg_byte(W_LIT);
+    bg_addr(3, 9);  bg_byte(W_DRK);
+    bg_addr(1, 12); bg_byte(W_DRK);
+    bg_addr(3, 12); bg_byte(W_LIT);
+    bg_addr(1, 15); bg_byte(W_LIT);
+    bg_addr(3, 15); bg_byte(W_DRK);
+    bg_addr(1, 18); bg_byte(W_LIT);
+    bg_addr(3, 18); bg_byte(W_LIT);
+    // Door
+    bg_addr(2, 19); bg_byte(DOOR);
+    bg_addr(2, 20); bg_byte(DOOR);
+
+    // ---- RIGHT BUILDING ----
+    r = 7;
+    while (r < 21) {
+        c = 26;
+        while (c < 32) { bg_addr(c, r); bg_byte(BWALL); c = c + 1; }
+        r = r + 1;
+    }
+    bg_addr(27, 9);  bg_byte(W_LIT);
+    bg_addr(29, 9);  bg_byte(W_LIT);
+    bg_addr(27, 12); bg_byte(W_DRK);
+    bg_addr(29, 12); bg_byte(W_LIT);
+    bg_addr(27, 15); bg_byte(W_LIT);
+    bg_addr(29, 15); bg_byte(W_DRK);
+    bg_addr(27, 18); bg_byte(W_DRK);
+    bg_addr(29, 18); bg_byte(W_LIT);
+    bg_addr(29, 19); bg_byte(DOOR);
+    bg_addr(29, 20); bg_byte(DOOR);
+
+    // ---- STREETLIGHTS ----
+    bg_addr(9, 13); bg_byte(LMP_T);
+    r = 14;
+    while (r < 21) { bg_addr(9, r); bg_byte(LMP_P); r = r + 1; }
+    bg_addr(22, 14); bg_byte(LMP_T);
+    r = 15;
+    while (r < 21) { bg_addr(22, r); bg_byte(LMP_P); r = r + 1; }
+
+    // ---- PROPS ----
+    bg_addr(6, 20); bg_byte(DUMP);
+    bg_addr(25, 20); bg_byte(TRSH);
+
+    // ---- SIDEWALK ----
+    r = 21;
+    while (r < 23) {
+        bg_addr(0, r);
+        c = 0;
+        while (c < 32) { bg_byte(GRND); c = c + 1; }
+        r = r + 1;
+    }
+
+    // ---- CURB ----
+    bg_addr(0, 23);
+    c = 0;
+    while (c < 32) { bg_byte(H_LINE); c = c + 1; }
+
+    // ---- STREET ----
+    r = 24;
+    while (r < 30) {
+        bg_addr(0, r);
+        c = 0;
+        while (c < 32) { bg_byte(STRT); c = c + 1; }
+        r = r + 1;
+    }
+    // Lane markings
+    bg_addr(4, 27);  bg_byte(H_LINE); bg_byte(H_LINE); bg_byte(H_LINE);
+    bg_addr(13, 27); bg_byte(H_LINE); bg_byte(H_LINE); bg_byte(H_LINE);
+    bg_addr(22, 27); bg_byte(H_LINE); bg_byte(H_LINE); bg_byte(H_LINE);
+}
+
+func draw_hud_bg() {
+    bg_text(1, 0, "HP");
+    bg_text(1, 1, "SCORE:    WAVE:");
+    bg_text(14, 0, "X");
+}
+
+func draw_attrs() {
+    byte ax = 0;
+    // Row 0: HUD palette 1
+    while (ax < 8) { bg_attr(ax, 0, 0x55); ax = ax + 1; }
+    // Rows 1-2 (sky): palette 1 (blue night)
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 1, 0x55); ax = ax + 1; }
+    // Buildings: palette 2 (warm brick)
+    bg_attr(0, 1, 0xAA); bg_attr(1, 1, 0xAA);
+    bg_attr(0, 2, 0xAA); bg_attr(1, 2, 0xAA);
+    bg_attr(0, 3, 0xAA); bg_attr(1, 3, 0xAA);
+    bg_attr(0, 4, 0xAA); bg_attr(1, 4, 0xAA);
+    bg_attr(6, 1, 0xAA); bg_attr(7, 1, 0xAA);
+    bg_attr(6, 2, 0xAA); bg_attr(7, 2, 0xAA);
+    bg_attr(6, 3, 0xAA); bg_attr(7, 3, 0xAA);
+    bg_attr(6, 4, 0xAA); bg_attr(7, 4, 0xAA);
+    // Ground: palette 3
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 5, 0xFF); ax = ax + 1; }
+    // Street: palette 0
+    ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 6, 0x00);
+        bg_attr(ax, 7, 0x00);
+        ax = ax + 1;
+    }
+}
+
+// ============ SPRITES ============
+
+func draw_player() {
+    byte dy = py - p_jump_y;
+    if (p_iframes > 0) {
+        if (p_iframes & 2) {
+            hide_sprite(0); hide_sprite(1); hide_sprite(2);
+            hide_sprite(3); hide_sprite(4);
+            return;
+        }
+    }
+
+    byte attr = 0;
+    if (p_dir == 1) { attr = 64; }
+
+    byte head = PH;
+    byte body = PB_I;
+    byte legs = PL_I;
+
+    if (p_state == 1) {
+        // Walk: alternate legs
+        byte wf = anim_frame & 8;
+        if (wf == 0) { legs = PL_J; }
+    }
+    if (p_state == 2) { body = PB_P; }
+    if (p_state == 3) { body = PB_K; legs = PL_I; }
+    if (p_state == 4) { body = PB_J; legs = PL_J; }
+    if (p_state == 5) { head = PH_H; body = PB_H; }
+
+    sprite(0, px, dy - 16, head, attr);
+    sprite(1, px, dy - 8, body, attr);
+    sprite(2, px, dy, legs, attr);
+
+    // Extended kick foot
+    if (p_state == 3) {
+        if (p_atk_timer > 3) {
+            byte fx = px + 8;
+            if (p_dir == 1) { fx = px - 8; }
+            sprite(3, fx, dy - 2, PF_K, attr);
+        } else {
+            hide_sprite(3);
+        }
+    } else {
+        hide_sprite(3);
+    }
+
+    // POW on hit
+    if (p_atk_timer > 0) {
+        if (p_atk_timer == 3) {
+            byte ex = px + 12;
+            if (p_dir == 1) { ex = px - 12; }
+            sprite(4, ex, dy - 8, POW, 2);
+        } else {
+            hide_sprite(4);
+        }
+    } else {
+        hide_sprite(4);
+    }
+}
+
+func draw_enemy(byte i) {
+    byte si = i + i + i;
+    si = si + 6;
+
+    if (en_state[i] == 0) {
+        hide_sprite(si); hide_sprite(si + 1); hide_sprite(si + 2);
+        return;
+    }
+
+    byte pal = 1;
+    if (en_type[i] == 2) { pal = 3; }
+    byte attr = pal;
+    if (en_dir[i] == 1) { attr = pal + 64; }
+
+    byte ex = en_x[i];
+    byte ey = en_y[i];
+
+    if (en_state[i] == 4) {
+        // Death
+        en_timer[i] = en_timer[i] - 1;
+        if (en_timer[i] > 10) {
+            sprite(si, ex, ey - 4, BOOM, 2);
+            hide_sprite(si + 1); hide_sprite(si + 2);
+        } else {
+            if (en_timer[i] > 0) {
+                if (en_timer[i] & 2) {
+                    hide_sprite(si); hide_sprite(si + 1); hide_sprite(si + 2);
+                } else {
+                    sprite(si, ex, ey, SPARKS, 2);
+                    hide_sprite(si + 1); hide_sprite(si + 2);
+                }
+            } else {
+                en_state[i] = 0;
+                hide_sprite(si); hide_sprite(si + 1); hide_sprite(si + 2);
+            }
+        }
+        return;
+    }
+
+    if (en_state[i] == 3) {
+        en_timer[i] = en_timer[i] - 1;
+        if (en_timer[i] == 0) { en_state[i] = 1; }
+        if (en_timer[i] & 2) {
+            hide_sprite(si); hide_sprite(si + 1); hide_sprite(si + 2);
+        } else {
+            byte h = EH;
+            if (en_type[i] == 2) { h = BHD; }
+            sprite(si, ex, ey - 16, h, attr);
+            sprite(si + 1, ex, ey - 8, EB, attr);
+            sprite(si + 2, ex, ey, ELE, attr);
+        }
+        return;
+    }
+
+    // Normal/attack
+    byte head = EH;
+    byte body = EB;
+    byte legs = ELE;
+    if (en_type[i] == 2) { head = BHD; body = BBD; legs = BLG; }
+    if (en_state[i] == 2) {
+        body = EA;
+        if (en_type[i] == 2) { body = BAT; }
+    }
+
+    sprite(si, ex, ey - 16, head, attr);
+    sprite(si + 1, ex, ey - 8, body, attr);
+    sprite(si + 2, ex, ey, legs, attr);
+}
+
+// ============ HUD (all sprites) ============
+
+func update_hud() {
+    byte i = 0;
+    while (i < 8) {
+        byte si = i + 24;
+        byte hx = i + i; hx = hx + i; hx = hx + i;
+        hx = hx + i; hx = hx + i; hx = hx + i; hx = hx + i;
+        hx = hx + 28;
+        if (i < p_hp) { sprite(si, hx, 0, HP_F, 2); }
+        else { sprite(si, hx, 0, HP_E, 2); }
+        i = i + 1;
+    }
+    sprite(32, 116, 0, 48 + p_lives, 0);
+    byte s = score_lo;
+    byte d2 = 0;
+    byte d1 = 0;
+    while (s >= 100) { d2 = d2 + 1; s = s - 100; }
+    while (s >= 10) { d1 = d1 + 1; s = s - 10; }
+    sprite(33, 52, 8, 48 + d2, 0);
+    sprite(34, 60, 8, 48 + d1, 0);
+    sprite(35, 68, 8, 48 + s, 0);
+    sprite(36, 124, 8, 48 + wave, 0);
+}
+
+// ============ COMBAT ============
+
+func player_attack(byte atk_type) {
+    if (p_atk_timer > 0) { return; }
+    if (p_state == 5) { return; }
+    if (atk_type == 0) { p_state = 2; p_atk_timer = 8; sfx_hit(); }
+    else { p_state = 3; p_atk_timer = 12; sfx_jump(); }
+
+    byte i = 0;
+    while (i < MAX_EN) {
+        if (en_state[i] > 0) {
+            if (en_state[i] < 3) {
+                byte ex = en_x[i];
+                byte dx = 0;
+                if (px > ex) { dx = px - ex; }
+                else { dx = ex - px; }
+                byte range = 16;
+                byte dmg = 1;
+                if (atk_type == 1) { range = 22; dmg = 2; }
+                if (p_jumping == 1) { dmg = dmg + 1; }
+                if (dx < range) {
+                    byte can = 0;
+                    if (p_dir == 0) { if (ex >= px) { can = 1; } }
+                    else { if (ex <= px) { can = 1; } }
+                    if (can == 1) {
+                        if (en_hp[i] <= dmg) {
+                            en_hp[i] = 0; en_state[i] = 4; en_timer[i] = 20;
+                            enemies_alive = enemies_alive - 1;
+                            byte pts = 10;
+                            if (en_type[i] == 2) { pts = 50; }
+                            score_lo = score_lo + pts;
+                            p_combo = p_combo + 1;
+                            sfx_explode(); shake = 4;
+                        } else {
+                            en_hp[i] = en_hp[i] - dmg; en_state[i] = 3; en_timer[i] = 10;
+                            if (p_dir == 0) { en_x[i] = en_x[i] + 6; }
+                            else { en_x[i] = en_x[i] - 6; }
+                            sfx_pickup();
+                        }
+                        hit_x = en_x[i]; hit_y = en_y[i] - 8; hit_timer = 6;
+                    }
+                }
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func player_take_hit(byte dmg) {
+    if (p_iframes > 0) { return; }
+    if (p_state == 5) { return; }
+    p_hp = p_hp - dmg;
+    p_state = 5; p_iframes = 30; p_combo = 0; shake = 6;
+    sfx_explode();
+    if (p_hp == 0) {
+        p_lives = p_lives - 1;
+        if (p_lives == 0) { mode = 2; }
+        else { p_hp = 8; }
+    }
+}
+
+func update_player() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+
+    if (p_atk_timer > 0) {
+        p_atk_timer = p_atk_timer - 1;
+        if (p_atk_timer == 0) {
+            if (p_state == 2) { p_state = 0; }
+            if (p_state == 3) { p_state = 0; }
+        }
+    }
+    if (p_state == 5) { if (p_iframes < 20) { p_state = 0; } }
+    if (p_iframes > 0) { p_iframes = p_iframes - 1; }
+
+    if (p_jumping == 1) {
+        if (p_jump_vel < 128) {
+            p_jump_y = p_jump_y + p_jump_vel;
+            p_jump_vel = p_jump_vel - 2;
+            if (p_jump_vel > 200) { p_jump_vel = 130; }
+        } else {
+            byte fall = p_jump_vel - 128;
+            if (p_jump_y > fall) { p_jump_y = p_jump_y - fall; }
+            else { p_jump_y = 0; p_jumping = 0; p_state = 0; }
+            p_jump_vel = p_jump_vel + 2;
+            if (p_jump_vel > 200) { p_jump_vel = 200; }
+        }
+    }
+
+    if (p_state < 2) {
+        if (pad & BTN_LEFT) { if (px > 8) { px = px - 2; } p_dir = 1; p_state = 1; }
+        if (pad & BTN_RIGHT) { if (px < 240) { px = px + 2; } p_dir = 0; p_state = 1; }
+        if (pad & BTN_LEFT) { }
+        else { if (pad & BTN_RIGHT) { } else { if (p_state == 1) { p_state = 0; } } }
+    }
+    if (pressed & BTN_UP) {
+        if (p_jumping == 0) { p_jumping = 1; p_jump_vel = 8; p_state = 4; sfx_jump(); }
+    }
+    if (pressed & BTN_A) { player_attack(0); }
+    if (pressed & BTN_B) { player_attack(1); }
+
+    draw_player();
+}
+
+// ============ ENEMY AI ============
+
+func spawn_enemy(byte etype) {
+    byte i = 0;
+    while (i < MAX_EN) {
+        if (en_state[i] == 0) {
+            en_type[i] = etype; en_state[i] = 1; en_timer[i] = 0;
+            byte side = rand();
+            if (side > 127) { en_x[i] = 240; en_dir[i] = 1; }
+            else { en_x[i] = 8; en_dir[i] = 0; }
+            en_y[i] = 168;
+            if (etype == 0) { en_hp[i] = 3; }
+            if (etype == 1) { en_hp[i] = 4; }
+            if (etype == 2) { en_hp[i] = 15; }
+            enemies_alive = enemies_alive + 1;
+            return;
+        }
+        i = i + 1;
+    }
+}
+
+func update_enemy(byte i) {
+    if (en_state[i] == 0) { draw_enemy(i); return; }
+    if (en_state[i] >= 3) { draw_enemy(i); return; }
+
+    byte dx = 0;
+    if (px > en_x[i]) { dx = px - en_x[i]; }
+    else { dx = en_x[i] - px; }
+
+    if (en_state[i] == 2) {
+        en_timer[i] = en_timer[i] - 1;
+        if (en_timer[i] == 4) {
+            if (dx < 18) {
+                byte dmg = 1;
+                if (en_type[i] == 2) { dmg = 2; }
+                player_take_hit(dmg);
+            }
+        }
+        if (en_timer[i] == 0) { en_state[i] = 1; }
+    } else {
+        byte speed = 1;
+        if (en_type[i] == 1) { speed = 2; }
+        if (dx < 12) {
+            byte ach = rand();
+            if (ach > 200) { en_state[i] = 2; en_timer[i] = 15; }
+        } else {
+            if (px > en_x[i]) { en_x[i] = en_x[i] + speed; en_dir[i] = 0; }
+            else { en_x[i] = en_x[i] - speed; en_dir[i] = 1; }
+        }
+    }
+    if (en_x[i] < 4) { en_x[i] = 4; }
+    if (en_x[i] > 244) { en_x[i] = 244; }
+    draw_enemy(i);
+}
+
+func update_enemies() {
+    byte i = 0;
+    while (i < MAX_EN) { update_enemy(i); i = i + 1; }
+}
+
+// ============ WAVES ============
+
+func start_wave() {
+    if (wave == 6) { mode = 3; return; }
+    spawn_count = wave + 2;
+    if (spawn_count > 8) { spawn_count = 8; }
+    spawn_timer = 30; enemies_left = spawn_count;
+
+    ppu_off();
+    bg_text(12, 12, "WAVE ");
+    bg_addr(17, 12); bg_byte(48 + wave);
+    bg_text(11, 14, "GET READY!");
+    ppu_on();
+    byte t = 0;
+    while (t < 90) { vblank(); t = t + 1; scroll(0, 0); }
+    ppu_off();
+    bg_text(11, 12, "          ");
+    bg_text(11, 14, "          ");
+    ppu_on();
+}
+
+func check_wave() {
+    if (enemies_alive == 0) {
+        if (enemies_left == 0) {
+            byte t = 0;
+            while (t < 30) { vblank(); t = t + 1; scroll(0, 0); }
+            wave = wave + 1; start_wave();
+        }
+    }
+    if (enemies_left > 0) {
+        if (spawn_timer > 0) { spawn_timer = spawn_timer - 1; }
+        else {
+            if (enemies_alive < 3) {
+                byte et = 0;
+                if (wave >= 3) { byte r = rand(); if (r > 170) { et = 1; } }
+                if (wave == 5) { if (enemies_left == 1) { et = 2; } }
+                spawn_enemy(et);
+                enemies_left = enemies_left - 1;
+                spawn_timer = 40;
+                if (wave > 2) { spawn_timer = 30; }
+            }
+        }
+    }
+}
+
+// ============ SCREENS ============
+
+func draw_title() {
+    clear_all();
+
+    // Starry night bg
+    byte sx = 2;
+    while (sx < 30) {
+        bg_addr(sx, 2); bg_byte(STARS);
+        bg_addr(sx + 1, 4); bg_byte(STARS);
+        sx = sx + 5;
+    }
+    bg_addr(14, 3); bg_byte(MOON);
+
+    // Title box
+    bg_addr(4, 6); bg_byte(TL);
+    byte tx = 5;
+    while (tx < 27) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(TR);
+    byte ty = 7;
+    while (ty < 14) {
+        bg_addr(4, ty); bg_byte(V_LINE);
+        bg_addr(27, ty); bg_byte(V_LINE);
+        ty = ty + 1;
+    }
+    bg_addr(4, 14); bg_byte(BL);
+    tx = 5;
+    while (tx < 27) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(BR);
+
+    bg_text(7, 7,  "S T R E E T");
+    bg_text(9, 9,  "F U R Y");
+    bg_text(7, 11, "DELUXE EDITION");
+    bg_text(8, 13, "NESLANG 2026");
+
+    bg_text(7, 17, "A = PUNCH  B = KICK");
+    bg_text(7, 18, "UP = JUMP");
+    bg_text(7, 19, "D-PAD = MOVE");
+    bg_text(9, 23, "PRESS START!");
+
+    // Chars preview
+    sprite(0, 80, 178, PH, 0);
+    sprite(1, 80, 186, PB_I, 0);
+    sprite(2, 80, 194, PL_I, 0);
+    sprite(6, 168, 178, EH, 1);
+    sprite(7, 168, 186, EB, 1);
+    sprite(8, 168, 194, ELE, 1);
+
+    byte ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 0, 0x55);
+        bg_attr(ax, 1, 0x55);
+        bg_attr(ax, 2, 0x55);
+        bg_attr(ax, 3, 0x00);
+        bg_attr(ax, 4, 0x55);
+        bg_attr(ax, 5, 0x55);
+        bg_attr(ax, 6, 0x00);
+        bg_attr(ax, 7, 0x00);
+        ax = ax + 1;
+    }
+}
+
+func title_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_START) {
+        byte si = 0;
+        while (si < 48) { hide_sprite(si); si = si + 1; }
+        mode = 1; wave = 1; p_hp = 8; p_lives = 3;
+        px = 80; py = 168; p_state = 0; p_iframes = 0;
+        p_jumping = 0; p_jump_y = 0; p_combo = 0; score_lo = 0;
+        enemies_alive = 0;
+        byte i = 0;
+        while (i < MAX_EN) { en_state[i] = 0; i = i + 1; }
+        ppu_off();
+        clear_all();
+        draw_street();
+        draw_hud_bg();
+        draw_attrs();
+        ppu_on();
+        start_wave();
+        sfx_pickup();
+    }
+
+    // Blink effects on title
+    if (frame & 16) {
+        sprite(20, 64, 184, POW, 2);
+        sprite(21, 184, 184, POW, 2);
+    } else {
+        sprite(20, 64, 184, SPARKS, 2);
+        sprite(21, 184, 184, SPARKS, 2);
+    }
+    scroll(0, 0);
+}
+
+func gameover_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+    if (frame == 2) {
+        ppu_off();
+        bg_text(10, 12, " GAME  OVER! ");
+        bg_text(9, 16, " START = RETRY ");
+        ppu_on();
+    }
+    if (pressed & BTN_START) {
+        mode = 0; ppu_off(); draw_title(); ppu_on();
+    }
+    scroll(0, 0);
+}
+
+func win_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+    if (frame == 2) {
+        ppu_off();
+        bg_text(9, 10, " YOU  WIN! ");
+        bg_text(7, 12, " STREET FURY CLEARED ");
+        bg_text(9, 16, " START = MENU ");
+        ppu_on();
+    }
+    if (pressed & BTN_START) {
+        mode = 0; ppu_off(); draw_title(); ppu_on();
+    }
+    scroll(0, 0);
+}
+
+// ============ MAIN ============
+
+func main() {
+    ppu_off();
+
+    // BG palettes - Night city
+    color(0, 0x0F, 0x30, 0x10, 0x00);  // P0: black/white/gray/dark
+    color(4, 0x0F, 0x21, 0x11, 0x01);  // P1: night sky blues
+    color(8, 0x0F, 0x27, 0x17, 0x07);  // P2: building warm (yellow/orange/brown)
+    color(12, 0x0F, 0x19, 0x29, 0x09); // P3: ground (green/olive)
+
+    // Sprite palettes
+    color(16, 0x0F, 0x02, 0x16, 0x36); // SP0: player (dk blue outline, red clothes, skin)
+    color(20, 0x0F, 0x18, 0x2A, 0x36); // SP1: enemy (olive outline, green clothes, skin)
+    color(24, 0x0F, 0x06, 0x27, 0x30); // SP2: effects (dk red, orange, white)
+    color(28, 0x0F, 0x08, 0x28, 0x36); // SP3: boss (brown outline, yellow clothes, skin)
+
+    enable_sound();
+    draw_title();
+    ppu_on();
+
+    while (true) {
+        vblank();
+        frame = frame + 1;
+        anim_frame = anim_frame + 1;
+
+        if (mode == 0) { title_update(); }
+        if (mode == 1) {
+            update_hud();
+            update_player();
+            update_enemies();
+            check_wave();
+
+            if (hit_timer > 0) {
+                hit_timer = hit_timer - 1;
+                sprite(5, hit_x, hit_y, SPARKS, 2);
+            } else {
+                hide_sprite(5);
+            }
+
+            if (shake > 0) {
+                shake = shake - 1;
+                if (shake & 1) { scroll(1, 1); }
+                else { scroll(0, 0); }
+            } else {
+                scroll(0, 0);
+            }
+        }
+        if (mode == 2) { gameover_update(); }
+        if (mode == 3) { win_update(); }
+        old_pad = gamepad(0);
+    }
+}

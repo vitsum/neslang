@@ -1,0 +1,14 @@
+// hello.nsl — Minimal NesLang example
+// Displays "HELLO WORLD" on screen
+
+func main() {
+    ppu_off();
+    color(0, 0x0F, 0x30, 0x10, 0x00);
+    bg_text(10, 14, "HELLO WORLD!");
+    ppu_on();
+
+    while (true) {
+        vblank();
+        scroll(0, 0);
+    }
+}

@@ -1,0 +1,1176 @@
+#!/usr/bin/env python3
+"""Build Asteroids NES ROM with classic Dendy-style title screen.
+Features big pixel-art title, animated sprites, proper NES menu."""
+import subprocess, sys, os, math
+
+# ====== SHIP & GAME ARTWORK (from original) ======
+
+SHIP = [
+    ".......XX.......",
+    "......X##X......",
+    ".....XOOOOX.....",
+    ".....XOOOOX.....",
+    "....XOOOOOOX....",
+    "....XOOOOOOX....",
+    "...XOOOOOOOOX...",
+    "..XOOOOOOOOOOX..",
+    ".XOOO......OOOX.",
+    "XOO..........OOX",
+    "XX............XX",
+    "..X..........X..",
+    "...XX......XX...",
+    ".....XXXXXX.....",
+    "................",
+    "................",
+]
+SHIP_THRUST = [
+    ".......XX.......",
+    "......X##X......",
+    ".....XOOOOX.....",
+    ".....XOOOOX.....",
+    "....XOOOOOOX....",
+    "....XOOOOOOX....",
+    "...XOOOOOOOOX...",
+    "..XOOOOOOOOOOX..",
+    ".XOOO......OOOX.",
+    "XOO..........OOX",
+    "XX............XX",
+    "..X..........X..",
+    "...X..XOOX..X...",
+    ".....XO##OX.....",
+    "......X##X......",
+    ".......XX.......",
+]
+ASTEROID_L1 = [
+    ".....XXXXX......",
+    "...XXOOOOOXX....",
+    "..XOOOOOOOOOX...",
+    ".XOOO..OOOOOOX..",
+    "XOOOOOOOOOOOOOX.",
+    "XOOOOOOOOOOOOOOX",
+    "XOOOOOOOOOOOOOOX",
+    "XOOOOO.OOOOOOOOX",
+    ".XOOOOOOOO.OOOX.",
+    ".XOOOOOOOOOOOOX.",
+    "..XOOOO.OOOOOX..",
+    "..XOOOOOOOOOOX..",
+    "...XOOOOOOOOOX..",
+    "....XOOOOOOOX...",
+    ".....XXXXXXX....",
+    "................",
+]
+ASTEROID_L2 = [
+    "......XXXXX.....",
+    "....XXOOOOOXX...",
+    "...XOOOOOOOOOXX.",
+    "..XOOOOOOO.OOOX.",
+    ".XOOOOOOOOOOOOOX",
+    "XOOOOO.OOOOOOOOX",
+    "XOOOOOOOOOOOOOOX",
+    "XOOOOOOOOO.OOOOX",
+    "XOOOOOOOOOOOOOX.",
+    ".XOOO.OOOOOOOOX.",
+    ".XOOOOOOOOOOOOX.",
+    "..XOOOOOO.OOOX..",
+    "...XOOOOOOOOX...",
+    "...XOOOOOOOOX...",
+    "....XXXXXXXX....",
+    "................",
+]
+ASTEROID_M = [
+    "..XXXX..",
+    ".XOOOOX.",
+    "XOO.OOOX",
+    "XOOOOOOX",
+    "XOOOO.OX",
+    "XOOOOOOX",
+    ".XOOOOX.",
+    "..XXXX..",
+]
+HEART = [
+    "........",
+    ".OO..OO.",
+    "OOOOOOOO",
+    "OOOOOOOO",
+    "OOOOOOOO",
+    ".OOOOOO.",
+    "..OOOO..",
+    "...OO...",
+]
+BULLET = [
+    "...XX...",
+    "..XOOX..",
+    "..XOOX..",
+    "...XX...",
+    "........",
+    "........",
+    "........",
+    "........",
+]
+EXPLODE1 = [
+    "X......X",
+    ".X.OO.X.",
+    "..XOOX..",
+    ".OOOOOO.",
+    "..XOOX..",
+    ".X.OO.X.",
+    "X......X",
+    "........",
+]
+EXPLODE2 = [
+    ".X....X.",
+    "..O..O..",
+    "X..OO..X",
+    "..OOOO..",
+    "X..OO..X",
+    "..O..O..",
+    ".X....X.",
+    "........",
+]
+
+# ====== BIG TITLE LETTERS (16x16 each) ======
+# Chunky NES pixel art letters for "ASTEROIDS"
+
+LETTER_A = [
+    "................",
+    "......XXXX......",
+    "....XXXXXXXX....",
+    "...XXX....XXX...",
+    "..XXX......XXX..",
+    "..XXX......XXX..",
+    ".XXX........XXX.",
+    ".XXXXXXXXXXXXXX.",
+    ".XXXXXXXXXXXXXX.",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    "XXX..........XXX",
+    "XXX..........XXX",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_S = [
+    "................",
+    "...XXXXXXXXXX...",
+    "..XXXXXXXXXXXX..",
+    ".XXX........XX..",
+    ".XXX............",
+    "..XXXXXXXXXXXX..",
+    "...XXXXXXXXXXXX.",
+    "............XXX.",
+    "............XXX.",
+    ".XX........XXX..",
+    "..XXXXXXXXXXXX..",
+    "...XXXXXXXXXX...",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_T = [
+    "................",
+    "XXXXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXXXX",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_E = [
+    "................",
+    ".XXXXXXXXXXXXXX.",
+    ".XXXXXXXXXXXXXX.",
+    ".XXX............",
+    ".XXX............",
+    ".XXXXXXXXXXX....",
+    ".XXXXXXXXXXX....",
+    ".XXX............",
+    ".XXX............",
+    ".XXX............",
+    ".XXXXXXXXXXXXXX.",
+    ".XXXXXXXXXXXXXX.",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_R = [
+    "................",
+    ".XXXXXXXXXXXX...",
+    ".XXXXXXXXXXXXX..",
+    ".XXX.......XXX..",
+    ".XXX.......XXX..",
+    ".XXXXXXXXXXXXX..",
+    ".XXXXXXXXXXXX...",
+    ".XXX....XXX.....",
+    ".XXX.....XXX....",
+    ".XXX......XXX...",
+    ".XXX.......XXX..",
+    ".XXX........XXX.",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_O = [
+    "................",
+    "...XXXXXXXXXX...",
+    "..XXXXXXXXXXXX..",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    "XXX..........XXX",
+    "XXX..........XXX",
+    "XXX..........XXX",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    "..XXXXXXXXXXXX..",
+    "...XXXXXXXXXX...",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_I = [
+    "................",
+    "..XXXXXXXXXXXX..",
+    "..XXXXXXXXXXXX..",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "......XXX.......",
+    "..XXXXXXXXXXXX..",
+    "..XXXXXXXXXXXX..",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+LETTER_D = [
+    "................",
+    ".XXXXXXXXXXX....",
+    ".XXXXXXXXXXXXX..",
+    ".XXX.......XXX..",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    ".XXX........XXX.",
+    ".XXX.......XXX..",
+    ".XXXXXXXXXXXXX..",
+    ".XXXXXXXXXXX....",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+# Small star bg tile
+STAR_SM = [
+    "........",
+    "........",
+    "........",
+    "...X....",
+    "........",
+    "........",
+    "........",
+    "........",
+]
+
+# Medium star bg tile  
+STAR_MD = [
+    "........",
+    "........",
+    "...X....",
+    "..XXX...",
+    "...X....",
+    "........",
+    "........",
+    "........",
+]
+
+# Arrow cursor
+ARROW = [
+    "........",
+    "XX......",
+    "XXXX....",
+    "XXXXXXX.",
+    "XXXXXXX.",
+    "XXXX....",
+    "XX......",
+    "........",
+]
+
+CHAR_MAP = {'.': 0, 'X': 1, 'O': 2, '#': 3}
+INV_MAP = {0: '.', 1: 'X', 2: 'O', 3: '#'}
+
+def parse_grid(lines):
+    return [[CHAR_MAP.get(c, 0) for c in line] for line in lines]
+
+def rotate_grid_16(grid, angle_deg):
+    size = 16
+    cx = cy = (size - 1) / 2.0
+    angle = math.radians(angle_deg)
+    cos_a, sin_a = math.cos(angle), math.sin(angle)
+    result = [[0]*size for _ in range(size)]
+    for y in range(size):
+        for x in range(size):
+            dx, dy = x - cx, y - cy
+            sx = dx * cos_a + dy * sin_a + cx
+            sy = -dx * sin_a + dy * cos_a + cy
+            si, sj = int(round(sx)), int(round(sy))
+            if 0 <= si < size and 0 <= sj < size:
+                result[y][x] = grid[sj][si]
+    return result
+
+def split_16(grid):
+    return [[row[:8] for row in grid[:8]], [row[8:] for row in grid[:8]],
+            [row[:8] for row in grid[8:]], [row[8:] for row in grid[8:]]]
+
+def tile_to_nsl(tid, g8):
+    lines = [f'tile {tid} = "']
+    for row in g8:
+        lines.append(''.join(INV_MAP[v] for v in row))
+    lines.append('";')
+    return '\n'.join(lines)
+
+def gen_all_tiles():
+    out = []
+    
+    # Big title letter tiles (1-32)
+    letters = [
+        ("A", LETTER_A, 1),
+        ("S", LETTER_S, 5),
+        ("T", LETTER_T, 9),
+        ("E", LETTER_E, 13),
+        ("R", LETTER_R, 17),
+        ("O", LETTER_O, 21),
+        ("I", LETTER_I, 25),
+        ("D", LETTER_D, 33),
+    ]
+    out.append("// ===== BIG TITLE LETTER TILES =====")
+    for name, art, base_tid in letters:
+        parts = split_16(parse_grid(art))
+        for t, p in enumerate(parts):
+            out.append(tile_to_nsl(base_tid + t, p))
+    
+    # Decoration tiles
+    out.append("// ===== DECORATION TILES =====")
+    for tid, art, label in [(37, STAR_SM, "SM STAR"), (38, STAR_MD, "MD STAR"), (39, ARROW, "ARROW")]:
+        out.append(tile_to_nsl(tid, parse_grid(art)))
+    
+    # Ship rotation tiles (91-154)
+    angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    for label, art, base in [("SHIP", SHIP, 91), ("SHIP THRUST", SHIP_THRUST, 123)]:
+        g = parse_grid(art)
+        out.append(f"// ===== {label} TILES =====")
+        for d, a in enumerate(angles):
+            rot = rotate_grid_16(g, a)
+            parts = split_16(rot)
+            tid = base + d * 4
+            for t, p in enumerate(parts):
+                out.append(tile_to_nsl(tid + t, p))
+    
+    # Asteroid tiles (155-162)
+    out.append("// ===== LARGE ASTEROIDS =====")
+    for vi, art in enumerate([ASTEROID_L1, ASTEROID_L2]):
+        parts = split_16(parse_grid(art))
+        tid = 155 + vi * 4
+        for t, p in enumerate(parts):
+            out.append(tile_to_nsl(tid + t, p))
+    
+    # Single tiles (163-167)
+    out.append("// ===== SINGLE TILES =====")
+    for tid, art in [(163, ASTEROID_M), (164, HEART), (165, BULLET), (166, EXPLODE1), (167, EXPLODE2)]:
+        out.append(tile_to_nsl(tid, parse_grid(art)))
+    
+    return '\n'.join(out)
+
+GAME = r"""
+const byte T_STAR_SM = 37;
+const byte T_STAR_MD = 38;
+const byte T_ARROW = 39;
+
+const byte MAX_AST = 8;
+const byte MAX_BUL = 4;
+const byte FIRE_RATE = 12;
+const byte BUL_LIFE = 45;
+const byte T_AST_M = 163;
+const byte T_HEART = 164;
+const byte T_BULLET = 165;
+const byte T_EXPL1 = 166;
+const byte T_EXPL2 = 167;
+
+byte ship_x = 128;
+byte ship_y = 120;
+byte ship_dir = 0;
+byte ship_vx = 128;
+byte ship_vy = 128;
+byte alive = 1;
+byte score_lo = 0;
+byte score_hi = 0;
+byte lives = 3;
+byte flash = 0;
+byte frame = 0;
+byte old_pad = 0;
+byte fire_cool = 0;
+byte game_state = 0;
+byte wave = 1;
+byte ast_count = 0;
+byte thrusting = 0;
+byte menu_sel = 0;
+byte hi_score_lo = 0;
+byte hi_score_hi = 0;
+
+byte[8] thr_dx = { 0, 1, 1, 1, 0, 255, 255, 255 };
+byte[8] thr_dy = { 255, 255, 0, 1, 1, 1, 0, 255 };
+byte[8] bul_dx = { 0, 2, 3, 2, 0, 254, 253, 254 };
+byte[8] bul_dy = { 253, 254, 0, 2, 3, 2, 0, 254 };
+byte[8] stile_base = { 91, 95, 99, 103, 107, 111, 115, 119 };
+byte[8] stile_thr = { 123, 127, 131, 135, 139, 143, 147, 151 };
+
+byte[8] ast_x;
+byte[8] ast_y;
+byte[8] ast_vx;
+byte[8] ast_vy;
+byte[8] ast_size;
+byte[8] ast_var;
+byte[4] bul_x;
+byte[4] bul_y;
+byte[4] bul_vx;
+byte[4] bul_vy;
+byte[4] bul_life;
+
+func abs_diff(byte a, byte b) {
+    if (a > b) { return a - b; }
+    return b - a;
+}
+
+func add_score(byte pts) {
+    score_lo = score_lo + pts;
+    if (score_lo > 99) {
+        score_lo = score_lo - 100;
+        score_hi = score_hi + 1;
+        if (score_hi > 9) { score_hi = 9; }
+    }
+}
+
+// ===== TITLE SCREEN =====
+
+func draw_big_letter(byte col, byte row, byte base_tile) {
+    byte t1 = base_tile;
+    byte t2 = base_tile + 1;
+    byte t3 = base_tile + 2;
+    byte t4 = base_tile + 3;
+    bg_addr(col, row);
+    bg_byte(t1);
+    bg_byte(t2);
+    bg_addr(col, row + 1);
+    bg_byte(t3);
+    bg_byte(t4);
+}
+
+func draw_title() {
+    // "ASTEROIDS" big letters centered
+    // 9 letters * 2 tiles = 18 tiles wide, start col 7
+    draw_big_letter(7, 3, 1);    // A
+    draw_big_letter(9, 3, 5);    // S
+    draw_big_letter(11, 3, 9);   // T
+    draw_big_letter(13, 3, 13);  // E
+    draw_big_letter(15, 3, 17);  // R
+    draw_big_letter(17, 3, 21);  // O
+    draw_big_letter(19, 3, 25);  // I
+    draw_big_letter(21, 3, 33);  // D
+    draw_big_letter(23, 3, 5);   // S (reuse)
+}
+
+func draw_starfield() {
+    // Small dots
+    bg_addr(2, 1); bg_byte(T_STAR_SM);
+    bg_addr(14, 0); bg_byte(T_STAR_SM);
+    bg_addr(28, 1); bg_byte(T_STAR_SM);
+    bg_addr(5, 6); bg_byte(T_STAR_SM);
+    bg_addr(26, 7); bg_byte(T_STAR_SM);
+    bg_addr(1, 10); bg_byte(T_STAR_SM);
+    bg_addr(30, 11); bg_byte(T_STAR_SM);
+    bg_addr(4, 14); bg_byte(T_STAR_SM);
+    bg_addr(27, 15); bg_byte(T_STAR_SM);
+    bg_addr(10, 17); bg_byte(T_STAR_SM);
+    bg_addr(22, 18); bg_byte(T_STAR_SM);
+    bg_addr(0, 21); bg_byte(T_STAR_SM);
+    bg_addr(15, 20); bg_byte(T_STAR_SM);
+    bg_addr(31, 22); bg_byte(T_STAR_SM);
+    bg_addr(8, 24); bg_byte(T_STAR_SM);
+    bg_addr(19, 23); bg_byte(T_STAR_SM);
+    bg_addr(3, 27); bg_byte(T_STAR_SM);
+    bg_addr(25, 26); bg_byte(T_STAR_SM);
+    bg_addr(13, 28); bg_byte(T_STAR_SM);
+    bg_addr(29, 29); bg_byte(T_STAR_SM);
+    // Brighter cross-stars
+    bg_addr(9, 1); bg_byte(T_STAR_MD);
+    bg_addr(21, 0); bg_byte(T_STAR_MD);
+    bg_addr(3, 8); bg_byte(T_STAR_MD);
+    bg_addr(28, 9); bg_byte(T_STAR_MD);
+    bg_addr(6, 16); bg_byte(T_STAR_MD);
+    bg_addr(24, 19); bg_byte(T_STAR_MD);
+    bg_addr(11, 25); bg_byte(T_STAR_MD);
+    bg_addr(30, 27); bg_byte(T_STAR_MD);
+}
+
+func draw_menu_text() {
+    // Score headers
+    bg_text(3, 7, "TOP");
+    bg_text(7, 7, "00000");
+
+    // Menu options
+    bg_text(13, 12, "1 PLAYER");
+    bg_text(13, 14, "2 PLAYERS");
+
+    // Controls info
+    bg_text(6, 18, "A-FIRE    B-THRUST");
+    bg_text(6, 20, "LEFT/RIGHT - ROTATE");
+
+    // Press start
+    bg_text(10, 24, "PRESS START");
+
+    // Copyright line
+    bg_text(7, 28, "c  2026  NES-LANG");
+}
+
+func draw_hi_score_menu() {
+    byte d = hi_score_lo;
+    byte tens = 0;
+    while (d >= 10) { d = d - 10; tens = tens + 1; }
+    bg_addr(7, 7);
+    bg_byte(48);
+    bg_byte(48);
+    bg_byte(hi_score_hi + 48);
+    bg_byte(tens + 48);
+    bg_byte(d + 48);
+}
+
+func set_title_attrs() {
+    // Title letters (rows 0-7 = attr rows 0,1) palette 1 (cyan)
+    byte ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 0, 0x55);
+        bg_attr(ax, 1, 0x55);
+        ax = ax + 1;
+    }
+    // Score + menu area (rows 8-15 = attr rows 2,3) palette 0 (white) - default
+
+    // Controls (rows 16-23 = attr rows 4,5) palette 2 (green)
+    ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 4, 0xAA);
+        ax = ax + 1;
+    }
+
+    // Press start (rows 20-27 = attr row 5) palette 3 (yellow)
+    ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 5, 0xFF);
+        ax = ax + 1;
+    }
+
+    // Copyright (rows 24-31 = attr rows 6,7) palette 2 (green)
+    ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 6, 0xAA);
+        bg_attr(ax, 7, 0xAA);
+        ax = ax + 1;
+    }
+}
+
+func draw_full_title() {
+    draw_starfield();
+    draw_title();
+    draw_menu_text();
+    draw_hi_score_menu();
+    set_title_attrs();
+}
+
+func clear_bg() {
+    byte y = 0;
+    while (y < 30) {
+        bg_addr(0, y);
+        byte x = 0;
+        while (x < 32) { bg_byte(0); x = x + 1; }
+        y = y + 1;
+    }
+    byte ay = 0;
+    while (ay < 8) {
+        byte ax = 0;
+        while (ax < 8) { bg_attr(ax, ay, 0x00); ax = ax + 1; }
+        ay = ay + 1;
+    }
+}
+
+// ===== GAME SPRITE FUNCTIONS =====
+
+func draw_multi(byte sid, byte px, byte py, byte base_t, byte attr) {
+    byte s1 = sid + 1;
+    byte s2 = sid + 2;
+    byte s3 = sid + 3;
+    byte bt1 = base_t + 1;
+    byte bt2 = base_t + 2;
+    byte bt3 = base_t + 3;
+    byte px8 = px + 8;
+    byte py8 = py + 8;
+    sprite(sid, px, py, base_t, attr);
+    sprite(s1, px8, py, bt1, attr);
+    sprite(s2, px, py8, bt2, attr);
+    sprite(s3, px8, py8, bt3, attr);
+}
+
+func hide_multi(byte sid) {
+    hide_sprite(sid);
+    byte s1 = sid + 1;
+    byte s2 = sid + 2;
+    byte s3 = sid + 3;
+    hide_sprite(s1);
+    hide_sprite(s2);
+    hide_sprite(s3);
+}
+
+func find_free_ast() {
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] == 0) { return i; }
+        i = i + 1;
+    }
+    return 255;
+}
+
+func count_live_ast() {
+    byte c = 0;
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) { c = c + 1; }
+        i = i + 1;
+    }
+    ast_count = c;
+}
+
+func spawn_ast(byte idx, byte sx, byte sy, byte size) {
+    ast_x[idx] = sx;
+    ast_y[idx] = sy;
+    ast_size[idx] = size;
+    byte rv = rand();
+    ast_var[idx] = rv & 1;
+    byte rd = rand();
+    byte d = rd & 3;
+    if (d == 0) { ast_vx[idx] = 1; }
+    if (d == 1) { ast_vx[idx] = 255; }
+    if (d == 2) { ast_vx[idx] = 0; }
+    if (d == 3) { ast_vx[idx] = 0; }
+    byte rd2 = rand();
+    byte d2 = rd2 & 3;
+    if (d2 == 0) { ast_vy[idx] = 1; }
+    if (d2 == 1) { ast_vy[idx] = 255; }
+    if (d2 == 2) { ast_vy[idx] = 0; }
+    if (d2 == 3) { ast_vy[idx] = 0; }
+    if (ast_vx[idx] == 0) {
+        if (ast_vy[idx] == 0) { ast_vx[idx] = 1; }
+    }
+}
+
+func spawn_wave_ast() {
+    byte n = wave + 2;
+    if (n > 5) { n = 5; }
+    byte i = 0;
+    while (i < n) {
+        byte fi = find_free_ast();
+        if (fi < MAX_AST) {
+            byte sx = rand();
+            byte sy = rand();
+            byte dx = abs_diff(sx, 128);
+            byte dy = abs_diff(sy, 120);
+            if (dx < 50) {
+                if (dy < 50) {
+                    if (sx > 128) { sx = sx + 50; }
+                    else { sx = sx - 50; }
+                }
+            }
+            if (sy > 220) { sy = 30; }
+            if (sy < 16) { sy = 30; }
+            spawn_ast(fi, sx, sy, 1);
+        }
+        i = i + 1;
+    }
+}
+
+func update_ship() {
+    byte dvx = ship_vx - 128;
+    ship_x = ship_x + dvx;
+    byte dvy = ship_vy - 128;
+    ship_y = ship_y + dvy;
+    if (ship_y > 230) {
+        if (ship_vy > 128) { ship_y = 8; }
+        else { ship_y = 224; }
+    }
+    byte fm = frame & 15;
+    if (fm == 0) {
+        if (ship_vx > 128) { ship_vx = ship_vx - 1; }
+        if (ship_vx < 128) { ship_vx = ship_vx + 1; }
+    }
+    if (fm == 8) {
+        if (ship_vy > 128) { ship_vy = ship_vy - 1; }
+        if (ship_vy < 128) { ship_vy = ship_vy + 1; }
+    }
+    if (flash > 0) {
+        flash = flash - 1;
+        if (flash & 2) { hide_multi(0); return; }
+    }
+    byte bt = stile_base[ship_dir];
+    if (thrusting == 1) { bt = stile_thr[ship_dir]; }
+    draw_multi(0, ship_x, ship_y, bt, 0);
+}
+
+func fire_bullet() {
+    byte i = 0;
+    while (i < MAX_BUL) {
+        if (bul_life[i] == 0) {
+            bul_x[i] = ship_x + 4;
+            bul_y[i] = ship_y + 4;
+            bul_vx[i] = bul_dx[ship_dir];
+            bul_vy[i] = bul_dy[ship_dir];
+            bul_life[i] = BUL_LIFE;
+            sfx_jump();
+            return;
+        }
+        i = i + 1;
+    }
+}
+
+func update_bullets() {
+    byte i = 0;
+    while (i < MAX_BUL) {
+        if (bul_life[i] > 0) {
+            bul_life[i] = bul_life[i] - 1;
+            byte si = i + 4;
+            if (bul_life[i] == 0) { hide_sprite(si); }
+            else {
+                bul_x[i] = bul_x[i] + bul_vx[i];
+                bul_y[i] = bul_y[i] + bul_vy[i];
+                sprite(si, bul_x[i], bul_y[i], T_BULLET, 3);
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func update_asteroids() {
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) {
+            byte sz = ast_size[i];
+            byte do_move = 1;
+            if (sz == 1) {
+                byte mf = frame & 1;
+                if (mf == 0) { do_move = 0; }
+            }
+            if (do_move == 1) {
+                ast_x[i] = ast_x[i] + ast_vx[i];
+                ast_y[i] = ast_y[i] + ast_vy[i];
+            }
+            byte ay = ast_y[i];
+            if (ay > 232) {
+                if (ast_vy[i] > 128) { ast_y[i] = 224; }
+            }
+            if (ay > 232) {
+                if (ast_vy[i] < 128) { ast_y[i] = 8; }
+            }
+            byte si = i * 4 + 8;
+            if (sz == 1) {
+                byte var = ast_var[i];
+                byte btile = 155;
+                if (var == 1) { btile = 159; }
+                draw_multi(si, ast_x[i], ast_y[i], btile, 2);
+            }
+            if (sz == 2) {
+                sprite(si, ast_x[i], ast_y[i], T_AST_M, 2);
+                byte h1 = si + 1;
+                byte h2 = si + 2;
+                byte h3 = si + 3;
+                hide_sprite(h1);
+                hide_sprite(h2);
+                hide_sprite(h3);
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func split_ast(byte idx) {
+    byte sz = ast_size[idx];
+    byte ax = ast_x[idx];
+    byte ay = ast_y[idx];
+    ast_size[idx] = 0;
+    byte si = idx * 4 + 8;
+    hide_multi(si);
+    if (sz == 2) {
+        add_score(3);
+        sfx_pickup();
+        return;
+    }
+    add_score(1);
+    byte f1 = find_free_ast();
+    if (f1 < MAX_AST) { spawn_ast(f1, ax + 8, ay, 2); }
+    byte f2 = find_free_ast();
+    if (f2 < MAX_AST) { spawn_ast(f2, ax - 8, ay + 4, 2); }
+}
+
+func check_bul_ast() {
+    byte b = 0;
+    while (b < MAX_BUL) {
+        if (bul_life[b] > 0) {
+            byte bx = bul_x[b];
+            byte by = bul_y[b];
+            byte i = 0;
+            while (i < MAX_AST) {
+                if (ast_size[i] > 0) {
+                    byte dx = abs_diff(bx, ast_x[i]);
+                    byte dy = abs_diff(by, ast_y[i]);
+                    byte hr = 6;
+                    if (ast_size[i] == 1) { hr = 12; }
+                    if (dx < hr) {
+                        if (dy < hr) {
+                            bul_life[b] = 0;
+                            byte bsi = b + 4;
+                            hide_sprite(bsi);
+                            split_ast(i);
+                            return;
+                        }
+                    }
+                }
+                i = i + 1;
+            }
+        }
+        b = b + 1;
+    }
+}
+
+func check_ship_ast() {
+    if (flash > 0) { return; }
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) {
+            byte dx = abs_diff(ship_x + 4, ast_x[i]);
+            byte dy = abs_diff(ship_y + 4, ast_y[i]);
+            byte hr = 6;
+            if (ast_size[i] == 1) { hr = 11; }
+            if (dx < hr) {
+                if (dy < hr) {
+                    sfx_explode();
+                    flash = 50;
+                    lives = lives - 1;
+                    ship_x = 128;
+                    ship_y = 120;
+                    ship_vx = 128;
+                    ship_vy = 128;
+                    if (lives == 0) { alive = 0; }
+                    return;
+                }
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func draw_hud() {
+    byte lx = 8;
+    byte li = 0;
+    while (li < 3) {
+        byte si = li + 40;
+        if (lives > li) { sprite(si, lx, 12, T_HEART, 1); }
+        else { hide_sprite(si); }
+        lx = lx + 10;
+        li = li + 1;
+    }
+    byte d = score_lo;
+    byte tens = 0;
+    while (d >= 10) { d = d - 10; tens = tens + 1; }
+    sprite(43, 216, 12, score_hi + 48, 0);
+    sprite(44, 224, 12, tens + 48, 0);
+    sprite(45, 232, 12, d + 48, 0);
+}
+
+func clear_all_sprites() {
+    byte j = 0;
+    while (j < 50) { hide_sprite(j); j = j + 1; }
+}
+
+func init_game() {
+    alive = 1; score_lo = 0; score_hi = 0; lives = 3;
+    ship_x = 128; ship_y = 120; ship_dir = 0;
+    ship_vx = 128; ship_vy = 128;
+    flash = 0; fire_cool = 0; wave = 1; thrusting = 0;
+    byte i = 0;
+    while (i < MAX_AST) { ast_size[i] = 0; i = i + 1; }
+    i = 0;
+    while (i < MAX_BUL) { bul_life[i] = 0; i = i + 1; }
+    clear_all_sprites();
+    spawn_wave_ast();
+}
+
+func update_hi_score() {
+    if (score_hi > hi_score_hi) {
+        hi_score_hi = score_hi;
+        hi_score_lo = score_lo;
+        return;
+    }
+    if (score_hi == hi_score_hi) {
+        if (score_lo > hi_score_lo) {
+            hi_score_lo = score_lo;
+        }
+    }
+}
+
+func game_over_anim() {
+    byte t = 0;
+    while (t < 60) {
+        vblank();
+        if (t & 4) {
+            draw_multi(0, ship_x, ship_y, 91, 1);
+            sprite(2, ship_x + 4, ship_y + 4, T_EXPL1, 1);
+        } else {
+            hide_multi(0);
+            sprite(2, ship_x + 4, ship_y + 4, T_EXPL2, 0);
+        }
+        scroll(0, 0);
+        t = t + 1;
+    }
+    clear_all_sprites();
+}
+
+func draw_game_bg() {
+    bg_addr(11, 4); bg_byte(T_STAR_SM);
+    bg_addr(3, 7); bg_byte(T_STAR_SM);
+    bg_addr(25, 9); bg_byte(T_STAR_SM);
+    bg_addr(7, 12); bg_byte(T_STAR_SM);
+    bg_addr(19, 15); bg_byte(T_STAR_SM);
+    bg_addr(2, 18); bg_byte(T_STAR_SM);
+    bg_addr(28, 20); bg_byte(T_STAR_SM);
+    bg_addr(14, 22); bg_byte(T_STAR_SM);
+    bg_addr(6, 25); bg_byte(T_STAR_SM);
+    bg_addr(22, 27); bg_byte(T_STAR_SM);
+    bg_addr(16, 2); bg_byte(T_STAR_MD);
+    bg_addr(1, 14); bg_byte(T_STAR_MD);
+    bg_addr(29, 24); bg_byte(T_STAR_MD);
+}
+
+// ===== MAIN =====
+
+func main() {
+    ppu_off();
+
+    // BG Palette 0: Black, white, gray, light gray (text/stars)
+    color(0, 0x0F, 0x30, 0x10, 0x20);
+    // BG Palette 1: Black, light cyan, bright cyan, white (title)
+    color(4, 0x0F, 0x2C, 0x21, 0x30);
+    // BG Palette 2: Black, green, light green, white (info)
+    color(8, 0x0F, 0x1A, 0x2A, 0x30);
+    // BG Palette 3: Black, yellow, light yellow, white (press start)
+    color(12, 0x0F, 0x28, 0x38, 0x30);
+
+    // Sprite palettes
+    color(16, 0x0F, 0x21, 0x31, 0x30);
+    color(20, 0x0F, 0x06, 0x16, 0x27);
+    color(24, 0x0F, 0x08, 0x18, 0x28);
+    color(28, 0x0F, 0x1A, 0x2A, 0x3A);
+
+    enable_sound();
+    draw_full_title();
+    ppu_on();
+
+    game_state = 0;
+    menu_sel = 0;
+
+    while (true) {
+        vblank();
+        frame = frame + 1;
+        byte pad = gamepad(0);
+        byte pressed = pad & (old_pad ^ 255);
+        old_pad = pad;
+
+        // ===== TITLE SCREEN =====
+        if (game_state == 0) {
+            if (pressed & BTN_DOWN) {
+                if (menu_sel == 0) { menu_sel = 1; sfx_hit(); }
+            }
+            if (pressed & BTN_UP) {
+                if (menu_sel == 1) { menu_sel = 0; sfx_hit(); }
+            }
+
+            // Animated cursor with wobble
+            byte cy = 92;
+            if (menu_sel == 1) { cy = 108; }
+            byte wobble = frame & 15;
+            byte cx = 84;
+            if (wobble < 4) { cx = 85; }
+            if (wobble > 11) { cx = 85; }
+            sprite(0, cx, cy, T_ARROW, 0);
+
+            // Floating asteroids on title screen
+            byte ast_xx = frame;
+            sprite(1, ast_xx, 30, T_AST_M, 2);
+            byte ast2_xx = 255 - frame;
+            sprite(2, ast2_xx, 50, T_AST_M, 2);
+
+            // Rotating ship decoration
+            byte sdir = frame & 7;
+            byte stile = stile_base[sdir];
+            byte ship_bob = frame & 31;
+            byte ssy = 72;
+            if (ship_bob < 8) { ssy = 70; }
+            if (ship_bob > 23) { ssy = 74; }
+            draw_multi(4, 120, ssy, stile, 0);
+
+            // Blink "PRESS START" decorations
+            byte blink = frame & 32;
+            if (blink) {
+                sprite(8, 72, 192, T_STAR_MD, 1);
+                sprite(9, 176, 192, T_STAR_MD, 1);
+            } else {
+                hide_sprite(8);
+                hide_sprite(9);
+            }
+
+            // Start game
+            if (pressed & BTN_START) {
+                sfx_jump();
+                clear_all_sprites();
+                ppu_off();
+                clear_bg();
+                draw_game_bg();
+                ppu_on();
+                init_game();
+                game_state = 1;
+            }
+            if (pressed & BTN_A) {
+                sfx_jump();
+                clear_all_sprites();
+                ppu_off();
+                clear_bg();
+                draw_game_bg();
+                ppu_on();
+                init_game();
+                game_state = 1;
+            }
+        }
+
+        // ===== PLAYING =====
+        if (game_state == 1) {
+            if (pressed & BTN_LEFT) {
+                if (ship_dir == 0) { ship_dir = 7; }
+                else { ship_dir = ship_dir - 1; }
+            }
+            if (pressed & BTN_RIGHT) {
+                ship_dir = ship_dir + 1;
+                if (ship_dir > 7) { ship_dir = 0; }
+            }
+            thrusting = 0;
+            if (pad & BTN_B) {
+                thrusting = 1;
+                byte tf = frame & 3;
+                if (tf == 0) {
+                    byte tdx = thr_dx[ship_dir];
+                    byte tdy = thr_dy[ship_dir];
+                    ship_vx = ship_vx + tdx;
+                    ship_vy = ship_vy + tdy;
+                    if (ship_vx > 130) { if (ship_vx < 200) { ship_vx = 130; } }
+                    if (ship_vx < 126) { if (ship_vx > 50) { ship_vx = 126; } }
+                    if (ship_vy > 130) { if (ship_vy < 200) { ship_vy = 130; } }
+                    if (ship_vy < 126) { if (ship_vy > 50) { ship_vy = 126; } }
+                }
+            }
+            if (fire_cool > 0) { fire_cool = fire_cool - 1; }
+            if (pressed & BTN_A) {
+                if (fire_cool == 0) { fire_bullet(); fire_cool = FIRE_RATE; }
+            }
+            update_ship();
+            update_bullets();
+            update_asteroids();
+            check_bul_ast();
+            check_ship_ast();
+            draw_hud();
+            count_live_ast();
+            if (ast_count == 0) {
+                wave = wave + 1;
+                if (wave > 8) { wave = 8; }
+                spawn_wave_ast();
+            }
+            if (alive == 0) {
+                update_hi_score();
+                game_over_anim();
+                ppu_off();
+                bg_text(11, 13, "GAME OVER");
+                bg_text(9, 16, "PRESS START");
+                ppu_on();
+                game_state = 2;
+            }
+        }
+
+        // ===== GAME OVER =====
+        if (game_state == 2) {
+            byte go_blink = frame & 32;
+            if (go_blink) {
+                sprite(0, 80, 104, T_STAR_MD, 1);
+                sprite(1, 168, 104, T_STAR_MD, 1);
+            } else {
+                hide_sprite(0);
+                hide_sprite(1);
+            }
+
+            if (pressed & BTN_START) {
+                clear_all_sprites();
+                ppu_off();
+                clear_bg();
+                draw_full_title();
+                ppu_on();
+                game_state = 0;
+                menu_sel = 0;
+            }
+        }
+
+        scroll(0, 0);
+    }
+}
+"""
+
+def build():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    nsl = gen_all_tiles() + "\n" + GAME
+    outname = "asteroids_menu"
+    with open(f"{outname}.nsl", "w") as f:
+        f.write(nsl)
+    print(f"Generated {outname}.nsl ({len(nsl)} bytes)")
+    r = subprocess.run(["python3", "../neslang.py", f"{outname}.nsl", "-o", f"{outname}.nes"],
+                       capture_output=True, text=True)
+    print(r.stdout)
+    if r.stderr: print(r.stderr)
+    if r.returncode != 0:
+        sys.exit(1)
+    print(f"Success! Built {outname}.nes")
+
+if __name__ == "__main__":
+    build()

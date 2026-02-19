@@ -1,0 +1,1006 @@
+// =============================================
+//  STACKO v2 — Тетрис-клон для NES
+//  7 классических фигур с вращением
+//  Заполни ряд — он исчезнет!
+// =============================================
+
+music "music.txt";
+
+// === TILES ===
+// Tile 16: filled block (color 4 / generic)
+tile 16 = "
+XXXXXXXX
+X######X
+X######X
+X######X
+X######X
+X######X
+X######X
+XXXXXXXX
+";
+
+// Tile 17: wall left
+tile 17 = "
+OOOOOOXX
+OOOOOOX#
+OOOOOOX#
+OOOOOOX#
+OOOOOOX#
+OOOOOOX#
+OOOOOOX#
+OOOOOOXX
+";
+
+// Tile 18: wall right
+tile 18 = "
+XXOOOOOO
+#XOOOOOO
+#XOOOOOO
+#XOOOOOO
+#XOOOOOO
+#XOOOOOO
+#XOOOOOO
+XXOOOOOO
+";
+
+// Tile 19: floor
+tile 19 = "
+XXXXXXXX
+########
+........
+........
+........
+........
+........
+........
+";
+
+// Tile 20: empty cell (dotted)
+tile 20 = "
+........
+........
+..X.....
+........
+........
+.....X..
+........
+........
+";
+
+// Tile 21: ghost/shadow block
+tile 21 = "
+XXXXXXXX
+X......X
+X......X
+X......X
+X......X
+X......X
+X......X
+XXXXXXXX
+";
+
+// Tile 22: piece block style 1
+tile 22 = "
+XXXXXXXX
+XOOOOOOX
+XOOOOOOX
+XOOOOOOX
+XOOOOOOX
+XOOOOOOX
+XOOOOOOX
+XXXXXXXX
+";
+
+// Tile 23: piece block style 2
+tile 23 = "
+XXXXXXXX
+X##OO##X
+X#OOOO#X
+XOOOOOO#
+XOOOOOOX
+X#OOOOO#
+X##OOO#X
+XXXXXXXX
+";
+
+// Tile 24: piece block style 3
+tile 24 = "
+XXXXXXXX
+X#XXXX#X
+XX####XX
+X######X
+X######X
+XX####XX
+X#XXXX#X
+XXXXXXXX
+";
+
+// === BOARD: 10 wide x 20 tall = 200 bytes ===
+ram byte[200] board;  // 0=empty, 1-4=color
+
+// Shape lookup tables: 7 types x 4 rotations x 4 blocks = 112
+ram byte[112] shape_dx;
+ram byte[112] shape_dy;
+
+// Game state
+byte piece_x = 3;      // current piece column
+byte piece_y = 0;      // current piece row
+byte piece_type = 0;   // 0-6: I,O,T,S,Z,L,J
+byte piece_rot = 0;    // 0-3 rotation
+byte piece_col = 1;    // color 1-4
+
+byte next_type = 0;    // next piece type
+byte next_rot = 0;     // always 0
+byte next_col = 1;
+
+byte fall_timer = 0;
+byte fall_speed = 40;   // frames per drop
+byte drop_fast = 0;
+
+byte game_over = 0;
+byte score_lo = 0;
+byte score_hi = 0;
+byte lines_lo = 0;
+byte level = 1;
+
+byte frame = 0;
+byte old_pad = 0;
+byte move_timer = 0;
+
+// Board position on screen
+const byte BOARD_X = 11;
+const byte BOARD_Y = 4;
+
+// ==========================================
+//  Init shape lookup tables
+// ==========================================
+func init_shapes() {
+    // I-piece (type 0) — base 0
+    // Rot 0: horizontal ----
+    shape_dx[0] = 0; shape_dy[0] = 1;
+    shape_dx[1] = 1; shape_dy[1] = 1;
+    shape_dx[2] = 2; shape_dy[2] = 1;
+    shape_dx[3] = 3; shape_dy[3] = 1;
+    // Rot 1: vertical |
+    shape_dx[4] = 2; shape_dy[4] = 0;
+    shape_dx[5] = 2; shape_dy[5] = 1;
+    shape_dx[6] = 2; shape_dy[6] = 2;
+    shape_dx[7] = 2; shape_dy[7] = 3;
+    // Rot 2: horizontal (shifted)
+    shape_dx[8] = 0; shape_dy[8] = 2;
+    shape_dx[9] = 1; shape_dy[9] = 2;
+    shape_dx[10] = 2; shape_dy[10] = 2;
+    shape_dx[11] = 3; shape_dy[11] = 2;
+    // Rot 3: vertical (shifted)
+    shape_dx[12] = 1; shape_dy[12] = 0;
+    shape_dx[13] = 1; shape_dy[13] = 1;
+    shape_dx[14] = 1; shape_dy[14] = 2;
+    shape_dx[15] = 1; shape_dy[15] = 3;
+
+    // O-piece (type 1) — base 16
+    // All rotations same
+    shape_dx[16] = 1; shape_dy[16] = 0;
+    shape_dx[17] = 2; shape_dy[17] = 0;
+    shape_dx[18] = 1; shape_dy[18] = 1;
+    shape_dx[19] = 2; shape_dy[19] = 1;
+    shape_dx[20] = 1; shape_dy[20] = 0;
+    shape_dx[21] = 2; shape_dy[21] = 0;
+    shape_dx[22] = 1; shape_dy[22] = 1;
+    shape_dx[23] = 2; shape_dy[23] = 1;
+    shape_dx[24] = 1; shape_dy[24] = 0;
+    shape_dx[25] = 2; shape_dy[25] = 0;
+    shape_dx[26] = 1; shape_dy[26] = 1;
+    shape_dx[27] = 2; shape_dy[27] = 1;
+    shape_dx[28] = 1; shape_dy[28] = 0;
+    shape_dx[29] = 2; shape_dy[29] = 0;
+    shape_dx[30] = 1; shape_dy[30] = 1;
+    shape_dx[31] = 2; shape_dy[31] = 1;
+
+    // T-piece (type 2) — base 32
+    // Rot 0: T pointing down
+    shape_dx[32] = 1; shape_dy[32] = 0;
+    shape_dx[33] = 0; shape_dy[33] = 1;
+    shape_dx[34] = 1; shape_dy[34] = 1;
+    shape_dx[35] = 2; shape_dy[35] = 1;
+    // Rot 1: T pointing left
+    shape_dx[36] = 1; shape_dy[36] = 0;
+    shape_dx[37] = 1; shape_dy[37] = 1;
+    shape_dx[38] = 2; shape_dy[38] = 1;
+    shape_dx[39] = 1; shape_dy[39] = 2;
+    // Rot 2: T pointing up
+    shape_dx[40] = 0; shape_dy[40] = 1;
+    shape_dx[41] = 1; shape_dy[41] = 1;
+    shape_dx[42] = 2; shape_dy[42] = 1;
+    shape_dx[43] = 1; shape_dy[43] = 2;
+    // Rot 3: T pointing right
+    shape_dx[44] = 1; shape_dy[44] = 0;
+    shape_dx[45] = 0; shape_dy[45] = 1;
+    shape_dx[46] = 1; shape_dy[46] = 1;
+    shape_dx[47] = 1; shape_dy[47] = 2;
+
+    // S-piece (type 3) — base 48
+    // Rot 0
+    shape_dx[48] = 1; shape_dy[48] = 0;
+    shape_dx[49] = 2; shape_dy[49] = 0;
+    shape_dx[50] = 0; shape_dy[50] = 1;
+    shape_dx[51] = 1; shape_dy[51] = 1;
+    // Rot 1
+    shape_dx[52] = 1; shape_dy[52] = 0;
+    shape_dx[53] = 1; shape_dy[53] = 1;
+    shape_dx[54] = 2; shape_dy[54] = 1;
+    shape_dx[55] = 2; shape_dy[55] = 2;
+    // Rot 2
+    shape_dx[56] = 1; shape_dy[56] = 1;
+    shape_dx[57] = 2; shape_dy[57] = 1;
+    shape_dx[58] = 0; shape_dy[58] = 2;
+    shape_dx[59] = 1; shape_dy[59] = 2;
+    // Rot 3
+    shape_dx[60] = 0; shape_dy[60] = 0;
+    shape_dx[61] = 0; shape_dy[61] = 1;
+    shape_dx[62] = 1; shape_dy[62] = 1;
+    shape_dx[63] = 1; shape_dy[63] = 2;
+
+    // Z-piece (type 4) — base 64
+    // Rot 0
+    shape_dx[64] = 0; shape_dy[64] = 0;
+    shape_dx[65] = 1; shape_dy[65] = 0;
+    shape_dx[66] = 1; shape_dy[66] = 1;
+    shape_dx[67] = 2; shape_dy[67] = 1;
+    // Rot 1
+    shape_dx[68] = 2; shape_dy[68] = 0;
+    shape_dx[69] = 1; shape_dy[69] = 1;
+    shape_dx[70] = 2; shape_dy[70] = 1;
+    shape_dx[71] = 1; shape_dy[71] = 2;
+    // Rot 2
+    shape_dx[72] = 0; shape_dy[72] = 1;
+    shape_dx[73] = 1; shape_dy[73] = 1;
+    shape_dx[74] = 1; shape_dy[74] = 2;
+    shape_dx[75] = 2; shape_dy[75] = 2;
+    // Rot 3
+    shape_dx[76] = 1; shape_dy[76] = 0;
+    shape_dx[77] = 0; shape_dy[77] = 1;
+    shape_dx[78] = 1; shape_dy[78] = 1;
+    shape_dx[79] = 0; shape_dy[79] = 2;
+
+    // L-piece (type 5) — base 80
+    // Rot 0
+    shape_dx[80] = 2; shape_dy[80] = 0;
+    shape_dx[81] = 0; shape_dy[81] = 1;
+    shape_dx[82] = 1; shape_dy[82] = 1;
+    shape_dx[83] = 2; shape_dy[83] = 1;
+    // Rot 1
+    shape_dx[84] = 1; shape_dy[84] = 0;
+    shape_dx[85] = 1; shape_dy[85] = 1;
+    shape_dx[86] = 1; shape_dy[86] = 2;
+    shape_dx[87] = 2; shape_dy[87] = 2;
+    // Rot 2
+    shape_dx[88] = 0; shape_dy[88] = 1;
+    shape_dx[89] = 1; shape_dy[89] = 1;
+    shape_dx[90] = 2; shape_dy[90] = 1;
+    shape_dx[91] = 0; shape_dy[91] = 2;
+    // Rot 3
+    shape_dx[92] = 0; shape_dy[92] = 0;
+    shape_dx[93] = 1; shape_dy[93] = 0;
+    shape_dx[94] = 1; shape_dy[94] = 1;
+    shape_dx[95] = 1; shape_dy[95] = 2;
+
+    // J-piece (type 6) — base 96
+    // Rot 0
+    shape_dx[96] = 0; shape_dy[96] = 0;
+    shape_dx[97] = 0; shape_dy[97] = 1;
+    shape_dx[98] = 1; shape_dy[98] = 1;
+    shape_dx[99] = 2; shape_dy[99] = 1;
+    // Rot 1
+    shape_dx[100] = 1; shape_dy[100] = 0;
+    shape_dx[101] = 2; shape_dy[101] = 0;
+    shape_dx[102] = 1; shape_dy[102] = 1;
+    shape_dx[103] = 1; shape_dy[103] = 2;
+    // Rot 2
+    shape_dx[104] = 0; shape_dy[104] = 1;
+    shape_dx[105] = 1; shape_dy[105] = 1;
+    shape_dx[106] = 2; shape_dy[106] = 1;
+    shape_dx[107] = 2; shape_dy[107] = 2;
+    // Rot 3
+    shape_dx[108] = 1; shape_dy[108] = 0;
+    shape_dx[109] = 1; shape_dy[109] = 1;
+    shape_dx[110] = 0; shape_dy[110] = 2;
+    shape_dx[111] = 1; shape_dy[111] = 2;
+}
+
+// ==========================================
+//  Compute base index: type*16 + rot*4
+// ==========================================
+func get_base(byte pt, byte pr) {
+    byte bi = pt;
+    bi = bi + bi;  // *2
+    bi = bi + bi;  // *4
+    bi = bi + bi;  // *8
+    bi = bi + bi;  // *16
+    byte ri = pr;
+    ri = ri + ri;  // *2
+    ri = ri + ri;  // *4
+    bi = bi + ri;
+    return bi;
+}
+
+// ==========================================
+//  Get color for piece type
+// ==========================================
+func get_color(byte pt) {
+    if (pt == 0) { return 1; }
+    if (pt == 1) { return 2; }
+    if (pt == 2) { return 3; }
+    if (pt == 3) { return 4; }
+    if (pt == 4) { return 1; }
+    if (pt == 5) { return 2; }
+    return 3;
+}
+
+// ==========================================
+//  Helper: get board cell
+// ==========================================
+func get_cell(byte bx, byte by) {
+    byte idx;
+    byte tc = by;
+    idx = by;
+    idx = idx + idx;  // *2
+    idx = idx + idx;  // *4
+    idx = idx + idx;  // *8
+    tc = tc + tc;     // *2
+    idx = idx + tc;   // *10
+    idx = idx + bx;
+    return board[idx];
+}
+
+// ==========================================
+//  Helper: set board cell
+// ==========================================
+func set_cell(byte bx, byte by, byte val) {
+    byte idx;
+    byte tc = by;
+    idx = by;
+    idx = idx + idx;
+    idx = idx + idx;
+    idx = idx + idx;
+    tc = tc + tc;
+    idx = idx + tc;
+    idx = idx + bx;
+    board[idx] = val;
+}
+
+// ==========================================
+//  Check if piece fits at (px, py) with given type & rot
+//  FIX: cx >= 10 catches unsigned underflow (left wall bug)
+// ==========================================
+func piece_fits(byte px, byte py, byte pt, byte pr) {
+    byte base = get_base(pt, pr);
+    byte fi = 0;
+    while (fi < 4) {
+        byte cx = px + shape_dx[base + fi];
+        byte cy = py + shape_dy[base + fi];
+        // cx >= 10 catches both out-of-bounds and underflow (0-1 = 255)
+        if (cx >= 10) { return 0; }
+        if (cy >= 20) { return 0; }
+        byte cv = get_cell(cx, cy);
+        if (cv > 0) { return 0; }
+        fi = fi + 1;
+    }
+    return 1;
+}
+
+// ==========================================
+//  Lock piece into board
+// ==========================================
+func lock_piece() {
+    byte base = get_base(piece_type, piece_rot);
+    byte li = 0;
+    while (li < 4) {
+        byte lx = piece_x + shape_dx[base + li];
+        byte ly = piece_y + shape_dy[base + li];
+        if (lx < 10) {
+            if (ly < 20) {
+                set_cell(lx, ly, piece_col);
+            }
+        }
+        li = li + 1;
+    }
+}
+
+// ==========================================
+//  Check and clear full lines
+// ==========================================
+func check_lines() {
+    byte cleared = 0;
+    byte row = 19;
+    byte check = 1;
+    while (check > 0) {
+        if (row > 19) {
+            check = 0;
+        } else {
+            byte full = 1;
+            byte col = 0;
+            while (col < 10) {
+                if (get_cell(col, row) == 0) {
+                    full = 0;
+                }
+                col = col + 1;
+            }
+            if (full > 0) {
+                byte sr = row;
+                while (sr > 0) {
+                    byte sc = 0;
+                    while (sc < 10) {
+                        byte above = get_cell(sc, sr - 1);
+                        set_cell(sc, sr, above);
+                        sc = sc + 1;
+                    }
+                    sr = sr - 1;
+                }
+                byte ttc = 0;
+                while (ttc < 10) {
+                    set_cell(ttc, 0, 0);
+                    ttc = ttc + 1;
+                }
+                cleared = cleared + 1;
+            } else {
+                row = row - 1;
+            }
+        }
+    }
+    return cleared;
+}
+
+// ==========================================
+//  Spawn new piece
+// ==========================================
+func spawn_piece() {
+    piece_type = next_type;
+    piece_rot = 0;
+    piece_col = get_color(piece_type);
+
+    piece_x = 3;
+    piece_y = 0;
+
+    // Generate next
+    byte r = rand();
+    byte raw = r & 7;
+    if (raw >= 7) { raw = 0; }
+    next_type = raw;
+    next_col = get_color(next_type);
+
+    // Check game over
+    byte fits = piece_fits(piece_x, piece_y, piece_type, piece_rot);
+    if (fits == 0) {
+        game_over = 1;
+    }
+}
+
+// ==========================================
+//  Add score for cleared lines
+// ==========================================
+func add_score(byte cl) {
+    lines_lo = lines_lo + cl;
+    byte pts = 0;
+    if (cl == 1) { pts = 10; }
+    if (cl == 2) { pts = 30; }
+    if (cl == 3) { pts = 50; }
+    if (cl == 4) { pts = 80; }
+    score_lo = score_lo + pts;
+    if (score_lo < pts) {
+        score_hi = score_hi + 1;
+    }
+    // Level up every 10 lines
+    byte lth = level;
+    byte lth2 = level + level;
+    lth = lth + lth;
+    lth = lth + lth;
+    lth = lth + lth;
+    lth = lth + lth2;
+    if (lines_lo >= lth) {
+        level = level + 1;
+        if (fall_speed > 5) {
+            fall_speed = fall_speed - 4;
+        }
+    }
+}
+
+// ==========================================
+//  Draw board to background
+// ==========================================
+func draw_board() {
+    byte row = 0;
+    while (row < 20) {
+        bg_addr(BOARD_X, BOARD_Y + row);
+        byte col = 0;
+        while (col < 10) {
+            byte cell = get_cell(col, row);
+            if (cell == 0) {
+                bg_byte(20);
+            }
+            if (cell == 1) { bg_byte(22); }
+            if (cell == 2) { bg_byte(23); }
+            if (cell == 3) { bg_byte(24); }
+            if (cell == 4) { bg_byte(16); }
+            col = col + 1;
+        }
+        row = row + 1;
+    }
+}
+
+// ==========================================
+//  Land piece: lock, check lines, spawn
+// ==========================================
+func land_piece() {
+    lock_piece();
+    sfx_hit();
+
+    ppu_off();
+    draw_board();
+
+    byte cl = check_lines();
+    if (cl > 0) {
+        add_score(cl);
+        sfx_explode();
+        draw_board();
+    }
+    draw_score();
+    ppu_on();
+
+    spawn_piece();
+    fall_timer = 0;
+}
+
+// ==========================================
+//  Draw current piece as sprites
+// ==========================================
+func draw_piece_sprites() {
+    byte base = get_base(piece_type, piece_rot);
+    byte di = 0;
+    while (di < 4) {
+        byte dx = shape_dx[base + di];
+        byte dy = shape_dy[base + di];
+        byte sx = BOARD_X + piece_x + dx;
+        sx = sx + sx;
+        sx = sx + sx;
+        sx = sx + sx;
+        byte sy = BOARD_Y + piece_y + dy;
+        sy = sy + sy;
+        sy = sy + sy;
+        sy = sy + sy;
+        byte tl = 22;
+        if (piece_col == 2) { tl = 23; }
+        if (piece_col == 3) { tl = 24; }
+        if (piece_col == 4) { tl = 16; }
+        byte attr = 0;
+        if (piece_col == 2) { attr = 1; }
+        if (piece_col == 3) { attr = 2; }
+        if (piece_col == 4) { attr = 3; }
+        sprite(di, sx, sy, tl, attr);
+        di = di + 1;
+    }
+
+    // Draw ghost
+    byte gy = piece_y;
+    byte gfits = 1;
+    while (gfits > 0) {
+        byte nf = piece_fits(piece_x, gy + 1, piece_type, piece_rot);
+        if (nf > 0) {
+            gy = gy + 1;
+        } else {
+            gfits = 0;
+        }
+    }
+    if (gy != piece_y) {
+        di = 0;
+        while (di < 4) {
+            byte gdx = shape_dx[base + di];
+            byte gdy = shape_dy[base + di];
+            byte gsx = BOARD_X + piece_x + gdx;
+            gsx = gsx + gsx;
+            gsx = gsx + gsx;
+            gsx = gsx + gsx;
+            byte gsy = BOARD_Y + gy + gdy;
+            gsy = gsy + gsy;
+            gsy = gsy + gsy;
+            gsy = gsy + gsy;
+            sprite(4 + di, gsx, gsy, 21, 0);
+            di = di + 1;
+        }
+    } else {
+        di = 0;
+        while (di < 4) {
+            hide_sprite(4 + di);
+            di = di + 1;
+        }
+    }
+}
+
+// ==========================================
+//  Draw next piece preview
+// ==========================================
+func draw_next_sprites() {
+    byte base = get_base(next_type, 0);
+    byte ni = 0;
+    while (ni < 4) {
+        byte ndx = shape_dx[base + ni];
+        byte ndy = shape_dy[base + ni];
+        byte nx = ndx;
+        nx = nx + nx;
+        nx = nx + nx;
+        nx = nx + nx;
+        nx = nx + 16;
+        byte ny = ndy;
+        ny = ny + ny;
+        ny = ny + ny;
+        ny = ny + ny;
+        ny = ny + 48;
+        byte tl = 22;
+        if (next_col == 2) { tl = 23; }
+        if (next_col == 3) { tl = 24; }
+        if (next_col == 4) { tl = 16; }
+        byte attr = 0;
+        if (next_col == 2) { attr = 1; }
+        if (next_col == 3) { attr = 2; }
+        if (next_col == 4) { attr = 3; }
+        sprite(8 + ni, nx, ny, tl, attr);
+        ni = ni + 1;
+    }
+}
+
+// ==========================================
+//  Draw HUD text
+// ==========================================
+func draw_hud_text() {
+    bg_text(1, 5, "NEXT");
+    bg_text(1, 12, "SCORE");
+    bg_text(1, 15, "LINES");
+    bg_text(1, 18, "LEVEL");
+    bg_text(22, 5, "STACKO");
+    bg_text(22, 7, "A=DROP");
+    bg_text(22, 8, "B=SPIN");
+    bg_text(22, 10, "D-PAD");
+    bg_text(22, 11, "=MOVE");
+}
+
+// ==========================================
+//  Update score display
+// ==========================================
+func draw_score() {
+    bg_addr(1, 13);
+    byte d100 = 0;
+    byte d10 = 0;
+    byte d1 = score_lo;
+    byte h = score_hi;
+    while (d1 >= 100) {
+        d100 = d100 + 1;
+        d1 = d1 - 100;
+    }
+    while (d1 >= 10) {
+        d10 = d10 + 1;
+        d1 = d1 - 10;
+    }
+    bg_byte(48 + h);
+    bg_byte(48 + d100);
+    bg_byte(48 + d10);
+    bg_byte(48 + d1);
+
+    bg_addr(1, 16);
+    byte l10 = 0;
+    byte l1 = lines_lo;
+    while (l1 >= 10) {
+        l10 = l10 + 1;
+        l1 = l1 - 10;
+    }
+    bg_byte(48 + l10);
+    bg_byte(48 + l1);
+
+    bg_addr(1, 19);
+    byte lv10 = 0;
+    byte lv1 = level;
+    while (lv1 >= 10) {
+        lv10 = lv10 + 1;
+        lv1 = lv1 - 10;
+    }
+    bg_byte(48 + lv10);
+    bg_byte(48 + lv1);
+}
+
+// ==========================================
+//  Draw static frame
+// ==========================================
+func draw_frame() {
+    byte r = 0;
+    while (r < 20) {
+        bg_addr(BOARD_X - 1, BOARD_Y + r);
+        bg_byte(17);
+        r = r + 1;
+    }
+    r = 0;
+    while (r < 20) {
+        bg_addr(BOARD_X + 10, BOARD_Y + r);
+        bg_byte(18);
+        r = r + 1;
+    }
+    bg_addr(BOARD_X - 1, BOARD_Y + 20);
+    byte c = 0;
+    while (c < 12) {
+        bg_byte(19);
+        c = c + 1;
+    }
+}
+
+// ==========================================
+//  Draw game over screen
+// ==========================================
+func draw_game_over() {
+    bg_text(12, 13, "GAME");
+    bg_text(12, 14, "OVER");
+    bg_text(11, 17, "START");
+}
+
+// ==========================================
+//  Clear entire board
+// ==========================================
+func clear_board() {
+    byte ci = 0;
+    while (ci < 200) {
+        board[ci] = 0;
+        ci = ci + 1;
+    }
+}
+
+// ==========================================
+//  MAIN
+// ==========================================
+func main() {
+    ppu_off();
+
+    //              BG    c1    c2    c3
+    color(0,  0x0F, 0x02, 0x12, 0x30);  // BG0: blue/white (board+walls)
+    color(4,  0x0F, 0x11, 0x21, 0x31);  // BG1: blues (HUD)
+    color(8,  0x0F, 0x15, 0x26, 0x37);  // BG2: reds
+    color(12, 0x0F, 0x19, 0x2A, 0x3A);  // BG3: greens
+
+    // Sprite palettes
+    color(16, 0x0F, 0x11, 0x21, 0x31);  // SPR0: blue
+    color(20, 0x0F, 0x17, 0x27, 0x37);  // SPR1: orange
+    color(24, 0x0F, 0x13, 0x23, 0x33);  // SPR2: purple
+    color(28, 0x0F, 0x1A, 0x2A, 0x3A);  // SPR3: green
+
+    // Attr table
+    byte ay = 1;
+    while (ay < 7) {
+        byte ax = 2;
+        while (ax < 6) {
+            bg_attr(ax, ay, 0x00);
+            ax = ax + 1;
+        }
+        ay = ay + 1;
+    }
+    bg_attr(0, 1, 0x55);
+    bg_attr(1, 1, 0x55);
+    bg_attr(0, 2, 0x55);
+    bg_attr(1, 2, 0x55);
+    bg_attr(0, 3, 0x55);
+    bg_attr(1, 3, 0x55);
+    bg_attr(0, 4, 0x55);
+    bg_attr(1, 4, 0x55);
+    bg_attr(0, 5, 0x55);
+    bg_attr(1, 5, 0x55);
+
+    init_shapes();
+    clear_board();
+    draw_frame();
+    draw_hud_text();
+    draw_board();
+
+    enable_sound();
+    music_init();
+
+    // First piece
+    byte r0 = rand();
+    next_type = r0 & 7;
+    if (next_type >= 7) { next_type = 0; }
+    next_col = get_color(next_type);
+    spawn_piece();
+
+    ppu_on();
+
+    // ======== GAME LOOP ========
+    while (true) {
+        vblank();
+        music_tick();
+        frame = frame + 1;
+
+        byte pad = gamepad(0);
+        byte pressed = pad & (old_pad ^ 255);
+        old_pad = pad;
+
+        if (game_over == 0) {
+            // === LEFT ===
+            if (pressed & BTN_LEFT) {
+                byte lf = piece_fits(piece_x - 1, piece_y, piece_type, piece_rot);
+                if (lf > 0) {
+                    piece_x = piece_x - 1;
+                    sfx_pickup();
+                }
+                move_timer = 0;
+            }
+            // === RIGHT ===
+            if (pressed & BTN_RIGHT) {
+                byte rf = piece_fits(piece_x + 1, piece_y, piece_type, piece_rot);
+                if (rf > 0) {
+                    piece_x = piece_x + 1;
+                    sfx_pickup();
+                }
+                move_timer = 0;
+            }
+            // DAS LEFT
+            if (pad & BTN_LEFT) {
+                move_timer = move_timer + 1;
+                if (move_timer > 12) {
+                    byte lf2 = piece_fits(piece_x - 1, piece_y, piece_type, piece_rot);
+                    if (lf2 > 0) {
+                        piece_x = piece_x - 1;
+                    }
+                    move_timer = 10;
+                }
+            }
+            // DAS RIGHT
+            if (pad & BTN_RIGHT) {
+                move_timer = move_timer + 1;
+                if (move_timer > 12) {
+                    byte rf2 = piece_fits(piece_x + 1, piece_y, piece_type, piece_rot);
+                    if (rf2 > 0) {
+                        piece_x = piece_x + 1;
+                    }
+                    move_timer = 10;
+                }
+            }
+            // Reset DAS
+            if ((pad & BTN_LEFT) == 0) {
+                if ((pad & BTN_RIGHT) == 0) {
+                    move_timer = 0;
+                }
+            }
+
+            // === ROTATION (B) ===
+            if (pressed & BTN_B) {
+                byte new_rot = piece_rot + 1;
+                if (new_rot >= 4) { new_rot = 0; }
+                byte rotf = piece_fits(piece_x, piece_y, piece_type, new_rot);
+                if (rotf > 0) {
+                    piece_rot = new_rot;
+                    sfx_pickup();
+                } else {
+                    // Wall kick right
+                    byte wk1 = piece_fits(piece_x + 1, piece_y, piece_type, new_rot);
+                    if (wk1 > 0) {
+                        piece_x = piece_x + 1;
+                        piece_rot = new_rot;
+                        sfx_pickup();
+                    } else {
+                        // Wall kick left
+                        byte wk2 = piece_fits(piece_x - 1, piece_y, piece_type, new_rot);
+                        if (wk2 > 0) {
+                            piece_x = piece_x - 1;
+                            piece_rot = new_rot;
+                            sfx_pickup();
+                        } else {
+                            // Wall kick 2 right (for I-piece)
+                            byte wk3 = piece_fits(piece_x + 2, piece_y, piece_type, new_rot);
+                            if (wk3 > 0) {
+                                piece_x = piece_x + 2;
+                                piece_rot = new_rot;
+                                sfx_pickup();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // === UP = also rotate (alternative) ===
+            if (pressed & BTN_UP) {
+                byte new_rot2 = piece_rot + 1;
+                if (new_rot2 >= 4) { new_rot2 = 0; }
+                byte rotf2 = piece_fits(piece_x, piece_y, piece_type, new_rot2);
+                if (rotf2 > 0) {
+                    piece_rot = new_rot2;
+                    sfx_pickup();
+                } else {
+                    byte wku1 = piece_fits(piece_x + 1, piece_y, piece_type, new_rot2);
+                    if (wku1 > 0) {
+                        piece_x = piece_x + 1;
+                        piece_rot = new_rot2;
+                        sfx_pickup();
+                    } else {
+                        byte wku2 = piece_fits(piece_x - 1, piece_y, piece_type, new_rot2);
+                        if (wku2 > 0) {
+                            piece_x = piece_x - 1;
+                            piece_rot = new_rot2;
+                            sfx_pickup();
+                        }
+                    }
+                }
+            }
+
+            // === Fast drop ===
+            if (pad & BTN_DOWN) {
+                drop_fast = 1;
+            } else {
+                drop_fast = 0;
+            }
+
+            // === Hard drop (A) ===
+            if (pressed & BTN_A) {
+                byte hf = 1;
+                while (hf > 0) {
+                    byte hfit = piece_fits(piece_x, piece_y + 1, piece_type, piece_rot);
+                    if (hfit > 0) {
+                        piece_y = piece_y + 1;
+                    } else {
+                        hf = 0;
+                    }
+                }
+                land_piece();
+            }
+
+            // === GRAVITY ===
+            if (game_over == 0) {
+                fall_timer = fall_timer + 1;
+                byte speed = fall_speed;
+                if (drop_fast > 0) { speed = 3; }
+
+                if (fall_timer >= speed) {
+                    fall_timer = 0;
+                    byte df = piece_fits(piece_x, piece_y + 1, piece_type, piece_rot);
+                    if (df > 0) {
+                        piece_y = piece_y + 1;
+                    } else {
+                        land_piece();
+                    }
+                }
+            }
+
+            // === DRAW ===
+            draw_piece_sprites();
+            draw_next_sprites();
+        } else {
+            // === GAME OVER ===
+            byte si = 0;
+            while (si < 16) {
+                hide_sprite(si);
+                si = si + 1;
+            }
+
+            if ((frame & 31) == 0) {
+                ppu_off();
+                draw_game_over();
+                ppu_on();
+            }
+
+            if (pressed & BTN_START) {
+                game_over = 0;
+                score_lo = 0;
+                score_hi = 0;
+                lines_lo = 0;
+                level = 1;
+                fall_speed = 40;
+                clear_board();
+
+                ppu_off();
+                draw_board();
+                draw_score();
+                ppu_on();
+
+                byte r1 = rand();
+                next_type = r1 & 7;
+                if (next_type >= 7) { next_type = 0; }
+                next_col = get_color(next_type);
+                spawn_piece();
+            }
+        }
+
+        scroll(0, 0);
+    }
+}

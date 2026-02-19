@@ -1,0 +1,33 @@
+// sound.nsl — Sound effects demo
+// Press buttons to hear different sounds
+
+func main() {
+    ppu_off();
+    color(0, 0x0F, 0x30, 0x10, 0x00);
+    bg_text(8, 6,  "SOUND DEMO");
+    bg_text(4, 10, "A      = PICKUP CHIRP");
+    bg_text(4, 12, "B      = HIT NOISE");
+    bg_text(4, 14, "UP     = JUMP SWEEP");
+    bg_text(4, 16, "DOWN   = EXPLOSION");
+    bg_text(4, 18, "SELECT = PLAY NOTE");
+    bg_text(4, 20, "START  = SILENCE");
+    enable_sound();
+    ppu_on();
+
+    byte old_pad = 0;
+    while (true) {
+        vblank();
+        byte pad = gamepad(0);
+        byte pressed = pad & (old_pad ^ 255);
+        old_pad = pad;
+
+        if (pressed & BTN_A)      { sfx_pickup(); }
+        if (pressed & BTN_B)      { sfx_hit(); }
+        if (pressed & BTN_UP)     { sfx_jump(); }
+        if (pressed & BTN_DOWN)   { sfx_explode(); }
+        if (pressed & BTN_SELECT) { play_note(0, 0xFD, 0x02, 10); }
+        if (pressed & BTN_START)  { silence(); }
+
+        scroll(0, 0);
+    }
+}

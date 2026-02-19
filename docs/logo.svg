@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+      .title { font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 48px; fill: #e60012; }
+      .sub { font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 10px; fill: #999; }
+      .pixel { fill: #e60012; }
+      .pixel-dark { fill: #8b0000; }
+      .pixel-light { fill: #ff4444; }
+    </style>
+  </defs>
+  
+  <!-- NES controller pixel art icon -->
+  <g transform="translate(8, 18)">
+    <!-- Controller body -->
+    <rect x="0" y="16" width="64" height="32" rx="4" fill="#333"/>
+    <rect x="2" y="18" width="60" height="28" rx="3" fill="#444"/>
+    
+    <!-- D-pad -->
+    <rect x="12" y="26" width="4" height="12" fill="#222"/>
+    <rect x="8" y="30" width="12" height="4" fill="#222"/>
+    
+    <!-- Buttons -->
+    <circle cx="44" cy="34" r="3.5" fill="#e60012"/>
+    <circle cx="52" cy="30" r="3.5" fill="#e60012"/>
+    
+    <!-- Select/Start -->
+    <rect x="24" y="34" width="6" height="2" rx="1" fill="#555"/>
+    <rect x="33" y="34" width="6" height="2" rx="1" fill="#555"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="82" y="58" class="title">NesLang</text>
+  <text x="84" y="80" class="sub">.nsl → .nes  //  write games, not assembly</text>
+</svg>

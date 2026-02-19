@@ -1,0 +1,1269 @@
+// ===== SHIP TILES =====
+tile 91 = "
+.......X
+......X#
+.....XOO
+.....XOO
+....XOOO
+....XOOO
+...XOOOO
+..XOOOOO
+";
+tile 92 = "
+X.......
+#X......
+OOX.....
+OOX.....
+OOOX....
+OOOX....
+OOOOX...
+OOOOOX..
+";
+tile 93 = "
+.XOOO...
+XOO.....
+XX......
+..X.....
+...XX...
+.....XXX
+........
+........
+";
+tile 94 = "
+...OOOX.
+.....OOX
+......XX
+.....X..
+...XX...
+XXX.....
+........
+........
+";
+tile 95 = "
+........
+........
+........
+.X.XXX.X
+XXOOOOOO
+.X..OOOO
+.X.....O
+.X......
+";
+tile 96 = "
+........
+........
+.XXXXX..
+OXOO#X..
+OOOOOX..
+OOOOOX..
+OOOOXX..
+OOOOO...
+";
+tile 97 = "
+.XX.....
+........
+..X.....
+...X....
+....X...
+.....X.X
+.......X
+........
+";
+tile 98 = "
+.OOOX...
+..OO....
+..OOX...
+..OOX...
+...OX...
+...O....
+XXXXX...
+...X....
+";
+tile 99 = "
+.....XX.
+.....XOX
+....X.OO
+...X...O
+...X...O
+..X.....
+..X.....
+..X.....
+";
+tile 100 = "
+........
+........
+X.......
+OX......
+OOXX....
+OOOOXX..
+OOOOOOX.
+OOOOOO#X
+";
+tile 101 = "
+..X.....
+..X.....
+..X.....
+...X...O
+...X...O
+....X.OO
+.....XOX
+.....XX.
+";
+tile 102 = "
+OOOOOO#X
+OOOOOOX.
+OOOOXX..
+OOXX....
+OX......
+X.......
+........
+........
+";
+tile 103 = "
+........
+.......X
+.....X.X
+....X...
+...X....
+..X.....
+........
+.XX.....
+";
+tile 104 = "
+...X....
+XXXXX...
+...O....
+...OX...
+..OOX...
+..OOX...
+..OO....
+.OOOX...
+";
+tile 105 = "
+.X......
+.X.....O
+.X..OOOO
+XXOOOOOO
+.X.XXX.X
+........
+........
+........
+";
+tile 106 = "
+OOOOO...
+OOOOXX..
+OOOOOX..
+OOOOOX..
+OXOO#X..
+.XXXXX..
+........
+........
+";
+tile 107 = "
+........
+........
+.....XXX
+...XX...
+..X.....
+XX......
+XOO.....
+.XOOO...
+";
+tile 108 = "
+........
+........
+XXX.....
+...XX...
+.....X..
+......XX
+.....OOX
+...OOOX.
+";
+tile 109 = "
+..XOOOOO
+...XOOOO
+....XOOO
+....XOOO
+.....XOO
+.....XOO
+......X#
+.......X
+";
+tile 110 = "
+OOOOOX..
+OOOOX...
+OOOX....
+OOOX....
+OOX.....
+OOX.....
+#X......
+X.......
+";
+tile 111 = "
+....X...
+...XXXXX
+....O...
+...XO...
+...XOO..
+...XOO..
+....OO..
+...XOOO.
+";
+tile 112 = "
+........
+X.......
+X.X.....
+...X....
+....X...
+.....X..
+........
+.....XX.
+";
+tile 113 = "
+...OOOOO
+..XXOOOO
+..XOOOOO
+..XOOOOO
+..X#OOXO
+..XXXXX.
+........
+........
+";
+tile 114 = "
+......X.
+O.....X.
+OOOO..X.
+OOOOOOXX
+X.XX..X.
+........
+........
+........
+";
+tile 115 = "
+........
+........
+.......X
+......XO
+....XXOO
+..XXOOOO
+.XOOOOOO
+X#OOOOOO
+";
+tile 116 = "
+.XX.....
+XOX.....
+OO.X....
+O...X...
+O...X...
+.....X..
+.....X..
+.....X..
+";
+tile 117 = "
+X#OOOOOO
+.XOOOOOO
+..XXOOOO
+....XXOO
+......XO
+.......X
+........
+........
+";
+tile 118 = "
+.....X..
+.....X..
+.....X..
+O...X...
+O...X...
+OO.X....
+XOX.....
+.XX.....
+";
+tile 119 = "
+........
+........
+..XXXXX.
+..X#OOXO
+..XOOOOO
+..XOOOOO
+..XXOOOO
+...OOOOO
+";
+tile 120 = "
+........
+........
+........
+X.XXX.X.
+OOOOOOXX
+OOOO..X.
+O.....X.
+......X.
+";
+tile 121 = "
+...XOOO.
+....OO..
+...XOO..
+...XOO..
+....O...
+....O...
+...XXXXX
+....X...
+";
+tile 122 = "
+.....XX.
+........
+.....X..
+....X...
+...X....
+X.X.....
+X.......
+........
+";
+// ===== SHIP THRUST TILES =====
+tile 123 = "
+.......X
+......X#
+.....XOO
+.....XOO
+....XOOO
+....XOOO
+...XOOOO
+..XOOOOO
+";
+tile 124 = "
+X.......
+#X......
+OOX.....
+OOX.....
+OOOX....
+OOOX....
+OOOOX...
+OOOOOX..
+";
+tile 125 = "
+.XOOO...
+XOO.....
+XX......
+..X.....
+...X..XO
+.....XO#
+......X#
+.......X
+";
+tile 126 = "
+...OOOX.
+.....OOX
+......XX
+.....X..
+OX..X...
+#OX.....
+#X......
+X.......
+";
+tile 127 = "
+........
+........
+........
+.X.XXX.X
+XXOOOOOO
+.X..OOOO
+.X.....O
+.X......
+";
+tile 128 = "
+........
+........
+.XXXXX..
+OXOO#X..
+OOOOOX..
+OOOOOX..
+OOOOXX..
+OOOOO...
+";
+tile 129 = "
+.X......
+........
+..XXO...
+..X#OO..
+..X##X..
+..XXXX..
+.......X
+........
+";
+tile 130 = "
+.OOOX...
+..OO....
+..OOX...
+..OOX...
+...OX...
+...O....
+XXXXX...
+...X....
+";
+tile 131 = "
+.....XX.
+.....XOX
+....X.OO
+...X...O
+.......O
+..X.....
+.XOX....
+X##O....
+";
+tile 132 = "
+........
+........
+X.......
+OX......
+OOXX....
+OOOOXX..
+OOOOOOX.
+OOOOOO#X
+";
+tile 133 = "
+X##O....
+.XOX....
+..X.....
+.......O
+...X...O
+....X.OO
+.....XOX
+.....XX.
+";
+tile 134 = "
+OOOOOO#X
+OOOOOOX.
+OOOOXX..
+OOXX....
+OX......
+X.......
+........
+........
+";
+tile 135 = "
+........
+.......X
+..XXXX..
+..X##X..
+..X#OO..
+..XXO...
+........
+.X......
+";
+tile 136 = "
+...X....
+XXXXX...
+...O....
+...OX...
+..OOX...
+..OOX...
+..OO....
+.OOOX...
+";
+tile 137 = "
+.X......
+.X.....O
+.X..OOOO
+XXOOOOOO
+.X.XXX.X
+........
+........
+........
+";
+tile 138 = "
+OOOOO...
+OOOOXX..
+OOOOOX..
+OOOOOX..
+OXOO#X..
+.XXXXX..
+........
+........
+";
+tile 139 = "
+.......X
+......X#
+.....XO#
+...X..XO
+..X.....
+XX......
+XOO.....
+.XOOO...
+";
+tile 140 = "
+X.......
+#X......
+#OX.....
+OX..X...
+.....X..
+......XX
+.....OOX
+...OOOX.
+";
+tile 141 = "
+..XOOOOO
+...XOOOO
+....XOOO
+....XOOO
+.....XOO
+.....XOO
+......X#
+.......X
+";
+tile 142 = "
+OOOOOX..
+OOOOX...
+OOOX....
+OOOX....
+OOX.....
+OOX.....
+#X......
+X.......
+";
+tile 143 = "
+....X...
+...XXXXX
+....O...
+...XO...
+...XOO..
+...XOO..
+....OO..
+...XOOO.
+";
+tile 144 = "
+........
+X.......
+..XXXX..
+..X##X..
+..OO#X..
+...OXX..
+........
+......X.
+";
+tile 145 = "
+...OOOOO
+..XXOOOO
+..XOOOOO
+..XOOOOO
+..X#OOXO
+..XXXXX.
+........
+........
+";
+tile 146 = "
+......X.
+O.....X.
+OOOO..X.
+OOOOOOXX
+X.XX..X.
+........
+........
+........
+";
+tile 147 = "
+........
+........
+.......X
+......XO
+....XXOO
+..XXOOOO
+.XOOOOOO
+X#OOOOOO
+";
+tile 148 = "
+.XX.....
+XOX.....
+OO.X....
+O...X...
+O.......
+.....X..
+....XOX.
+....O##X
+";
+tile 149 = "
+X#OOOOOO
+.XOOOOOO
+..XXOOOO
+....XXOO
+......XO
+.......X
+........
+........
+";
+tile 150 = "
+....O##X
+....XOX.
+.....X..
+O.......
+O...X...
+OO.X....
+XOX.....
+.XX.....
+";
+tile 151 = "
+........
+........
+..XXXXX.
+..X#OOXO
+..XOOOOO
+..XOOOOO
+..XXOOOO
+...OOOOO
+";
+tile 152 = "
+........
+........
+........
+X.XXX.X.
+OOOOOOXX
+OOOO..X.
+O.....X.
+......X.
+";
+tile 153 = "
+...XOOO.
+....OO..
+...XOO..
+...XOO..
+....O...
+....O...
+...XXXXX
+....X...
+";
+tile 154 = "
+......X.
+........
+...OXX..
+..OO#X..
+..X##X..
+..XXXX..
+X.......
+........
+";
+// ===== LARGE ASTEROIDS =====
+tile 155 = "
+.....XXX
+...XXOOO
+..XOOOOO
+.XOOO..O
+XOOOOOOO
+XOOOOOOO
+XOOOOOOO
+XOOOOO.O
+";
+tile 156 = "
+XX......
+OOXX....
+OOOOX...
+OOOOOX..
+OOOOOOX.
+OOOOOOOX
+OOOOOOOX
+OOOOOOOX
+";
+tile 157 = "
+.XOOOOOO
+.XOOOOOO
+..XOOOO.
+..XOOOOO
+...XOOOO
+....XOOO
+.....XXX
+........
+";
+tile 158 = "
+OO.OOOX.
+OOOOOOX.
+OOOOOX..
+OOOOOX..
+OOOOOX..
+OOOOX...
+XXXX....
+........
+";
+tile 159 = "
+......XX
+....XXOO
+...XOOOO
+..XOOOOO
+.XOOOOOO
+XOOOOO.O
+XOOOOOOO
+XOOOOOOO
+";
+tile 160 = "
+XXX.....
+OOOXX...
+OOOOOXX.
+OO.OOOX.
+OOOOOOOX
+OOOOOOOX
+OOOOOOOX
+OO.OOOOX
+";
+tile 161 = "
+XOOOOOOO
+.XOOO.OO
+.XOOOOOO
+..XOOOOO
+...XOOOO
+...XOOOO
+....XXXX
+........
+";
+tile 162 = "
+OOOOOOX.
+OOOOOOX.
+OOOOOOX.
+O.OOOX..
+OOOOX...
+OOOOX...
+XXXX....
+........
+";
+// ===== SINGLE TILES =====
+tile 163 = "
+..XXXX..
+.XOOOOX.
+XOO.OOOX
+XOOOOOOX
+XOOOO.OX
+XOOOOOOX
+.XOOOOX.
+..XXXX..
+";
+tile 164 = "
+........
+.OO..OO.
+OOOOOOOO
+OOOOOOOO
+OOOOOOOO
+.OOOOOO.
+..OOOO..
+...OO...
+";
+tile 165 = "
+...XX...
+..XOOX..
+..XOOX..
+...XX...
+........
+........
+........
+........
+";
+tile 166 = "
+X......X
+.X.OO.X.
+..XOOX..
+.OOOOOO.
+..XOOX..
+.X.OO.X.
+X......X
+........
+";
+tile 167 = "
+.X....X.
+..O..O..
+X..OO..X
+..OOOO..
+X..OO..X
+..O..O..
+.X....X.
+........
+";
+
+const byte MAX_AST = 8;
+const byte MAX_BUL = 4;
+const byte FIRE_RATE = 12;
+const byte BUL_LIFE = 45;
+const byte T_AST_M = 163;
+const byte T_HEART = 164;
+const byte T_BULLET = 165;
+const byte T_EXPL1 = 166;
+const byte T_EXPL2 = 167;
+
+byte ship_x = 128;
+byte ship_y = 120;
+byte ship_dir = 0;
+byte ship_vx = 128;
+byte ship_vy = 128;
+byte alive = 1;
+byte score_lo = 0;
+byte score_hi = 0;
+byte lives = 3;
+byte flash = 0;
+byte frame = 0;
+byte old_pad = 0;
+byte fire_cool = 0;
+byte game_state = 0;
+byte wave = 1;
+byte ast_count = 0;
+byte thrusting = 0;
+
+byte[8] thr_dx = { 0, 1, 1, 1, 0, 255, 255, 255 };
+byte[8] thr_dy = { 255, 255, 0, 1, 1, 1, 0, 255 };
+byte[8] bul_dx = { 0, 2, 3, 2, 0, 254, 253, 254 };
+byte[8] bul_dy = { 253, 254, 0, 2, 3, 2, 0, 254 };
+byte[8] stile_base = { 91, 95, 99, 103, 107, 111, 115, 119 };
+byte[8] stile_thr = { 123, 127, 131, 135, 139, 143, 147, 151 };
+
+byte[8] ast_x;
+byte[8] ast_y;
+byte[8] ast_vx;
+byte[8] ast_vy;
+byte[8] ast_size;
+byte[8] ast_var;
+byte[4] bul_x;
+byte[4] bul_y;
+byte[4] bul_vx;
+byte[4] bul_vy;
+byte[4] bul_life;
+
+func abs_diff(byte a, byte b) {
+    if (a > b) { return a - b; }
+    return b - a;
+}
+
+func add_score(byte pts) {
+    score_lo = score_lo + pts;
+    if (score_lo > 99) {
+        score_lo = score_lo - 100;
+        score_hi = score_hi + 1;
+        if (score_hi > 9) { score_hi = 9; }
+    }
+}
+
+func draw_multi(byte sid, byte px, byte py, byte base_t, byte attr) {
+    byte s1 = sid + 1;
+    byte s2 = sid + 2;
+    byte s3 = sid + 3;
+    byte bt1 = base_t + 1;
+    byte bt2 = base_t + 2;
+    byte bt3 = base_t + 3;
+    byte px8 = px + 8;
+    byte py8 = py + 8;
+    sprite(sid, px, py, base_t, attr);
+    sprite(s1, px8, py, bt1, attr);
+    sprite(s2, px, py8, bt2, attr);
+    sprite(s3, px8, py8, bt3, attr);
+}
+
+func hide_multi(byte sid) {
+    hide_sprite(sid);
+    byte s1 = sid + 1;
+    byte s2 = sid + 2;
+    byte s3 = sid + 3;
+    hide_sprite(s1);
+    hide_sprite(s2);
+    hide_sprite(s3);
+}
+
+func find_free_ast() {
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] == 0) { return i; }
+        i = i + 1;
+    }
+    return 255;
+}
+
+func count_live_ast() {
+    byte c = 0;
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) { c = c + 1; }
+        i = i + 1;
+    }
+    ast_count = c;
+}
+
+func spawn_ast(byte idx, byte sx, byte sy, byte size) {
+    ast_x[idx] = sx;
+    ast_y[idx] = sy;
+    ast_size[idx] = size;
+    byte rv = rand();
+    ast_var[idx] = rv & 1;
+    byte rd = rand();
+    byte d = rd & 3;
+    if (d == 0) { ast_vx[idx] = 1; }
+    if (d == 1) { ast_vx[idx] = 255; }
+    if (d == 2) { ast_vx[idx] = 0; }
+    if (d == 3) { ast_vx[idx] = 0; }
+    byte rd2 = rand();
+    byte d2 = rd2 & 3;
+    if (d2 == 0) { ast_vy[idx] = 1; }
+    if (d2 == 1) { ast_vy[idx] = 255; }
+    if (d2 == 2) { ast_vy[idx] = 0; }
+    if (d2 == 3) { ast_vy[idx] = 0; }
+    if (ast_vx[idx] == 0) {
+        if (ast_vy[idx] == 0) { ast_vx[idx] = 1; }
+    }
+}
+
+func spawn_wave_ast() {
+    byte n = wave + 2;
+    if (n > 5) { n = 5; }
+    byte i = 0;
+    while (i < n) {
+        byte fi = find_free_ast();
+        if (fi < MAX_AST) {
+            byte sx = rand();
+            byte sy = rand();
+            byte dx = abs_diff(sx, 128);
+            byte dy = abs_diff(sy, 120);
+            if (dx < 50) {
+                if (dy < 50) {
+                    if (sx > 128) { sx = sx + 50; }
+                    else { sx = sx - 50; }
+                }
+            }
+            if (sy > 220) { sy = 30; }
+            if (sy < 16) { sy = 30; }
+            spawn_ast(fi, sx, sy, 1);
+        }
+        i = i + 1;
+    }
+}
+
+func update_ship() {
+    byte dvx = ship_vx - 128;
+    ship_x = ship_x + dvx;
+    byte dvy = ship_vy - 128;
+    ship_y = ship_y + dvy;
+    if (ship_y > 230) {
+        if (ship_vy > 128) { ship_y = 8; }
+        else { ship_y = 224; }
+    }
+    // Friction: both axes every 16 frames, staggered
+    byte fm = frame & 15;
+    if (fm == 0) {
+        if (ship_vx > 128) { ship_vx = ship_vx - 1; }
+        if (ship_vx < 128) { ship_vx = ship_vx + 1; }
+    }
+    if (fm == 8) {
+        if (ship_vy > 128) { ship_vy = ship_vy - 1; }
+        if (ship_vy < 128) { ship_vy = ship_vy + 1; }
+    }
+    if (flash > 0) {
+        flash = flash - 1;
+        if (flash & 2) { hide_multi(0); return; }
+    }
+    byte bt = stile_base[ship_dir];
+    if (thrusting == 1) { bt = stile_thr[ship_dir]; }
+    draw_multi(0, ship_x, ship_y, bt, 0);
+}
+
+func fire_bullet() {
+    byte i = 0;
+    while (i < MAX_BUL) {
+        if (bul_life[i] == 0) {
+            bul_x[i] = ship_x + 4;
+            bul_y[i] = ship_y + 4;
+            bul_vx[i] = bul_dx[ship_dir];
+            bul_vy[i] = bul_dy[ship_dir];
+            bul_life[i] = BUL_LIFE;
+            sfx_jump();
+            return;
+        }
+        i = i + 1;
+    }
+}
+
+func update_bullets() {
+    byte i = 0;
+    while (i < MAX_BUL) {
+        if (bul_life[i] > 0) {
+            bul_life[i] = bul_life[i] - 1;
+            byte si = i + 4;
+            if (bul_life[i] == 0) { hide_sprite(si); }
+            else {
+                bul_x[i] = bul_x[i] + bul_vx[i];
+                bul_y[i] = bul_y[i] + bul_vy[i];
+                sprite(si, bul_x[i], bul_y[i], T_BULLET, 3);
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func update_asteroids() {
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) {
+            byte sz = ast_size[i];
+            byte do_move = 1;
+            if (sz == 1) {
+                byte mf = frame & 1;
+                if (mf == 0) { do_move = 0; }
+            }
+            if (do_move == 1) {
+                ast_x[i] = ast_x[i] + ast_vx[i];
+                ast_y[i] = ast_y[i] + ast_vy[i];
+            }
+            byte ay = ast_y[i];
+            if (ay > 232) {
+                if (ast_vy[i] > 128) { ast_y[i] = 224; }
+            }
+            if (ay > 232) {
+                if (ast_vy[i] < 128) { ast_y[i] = 8; }
+            }
+            byte si = i * 4 + 8;
+            if (sz == 1) {
+                byte var = ast_var[i];
+                byte btile = 155;
+                if (var == 1) { btile = 159; }
+                draw_multi(si, ast_x[i], ast_y[i], btile, 2);
+            }
+            if (sz == 2) {
+                sprite(si, ast_x[i], ast_y[i], T_AST_M, 2);
+                byte h1 = si + 1;
+                byte h2 = si + 2;
+                byte h3 = si + 3;
+                hide_sprite(h1);
+                hide_sprite(h2);
+                hide_sprite(h3);
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func split_ast(byte idx) {
+    byte sz = ast_size[idx];
+    byte ax = ast_x[idx];
+    byte ay = ast_y[idx];
+    ast_size[idx] = 0;
+    byte si = idx * 4 + 8;
+    hide_multi(si);
+    if (sz == 2) {
+        add_score(3);
+        sfx_pickup();
+        return;
+    }
+    add_score(1);
+    byte f1 = find_free_ast();
+    if (f1 < MAX_AST) { spawn_ast(f1, ax + 8, ay, 2); }
+    byte f2 = find_free_ast();
+    if (f2 < MAX_AST) { spawn_ast(f2, ax - 8, ay + 4, 2); }
+}
+
+func check_bul_ast() {
+    byte b = 0;
+    while (b < MAX_BUL) {
+        if (bul_life[b] > 0) {
+            byte bx = bul_x[b];
+            byte by = bul_y[b];
+            byte i = 0;
+            while (i < MAX_AST) {
+                if (ast_size[i] > 0) {
+                    byte dx = abs_diff(bx, ast_x[i]);
+                    byte dy = abs_diff(by, ast_y[i]);
+                    byte hr = 6;
+                    if (ast_size[i] == 1) { hr = 12; }
+                    if (dx < hr) {
+                        if (dy < hr) {
+                            bul_life[b] = 0;
+                            byte bsi = b + 4;
+                            hide_sprite(bsi);
+                            split_ast(i);
+                            return;
+                        }
+                    }
+                }
+                i = i + 1;
+            }
+        }
+        b = b + 1;
+    }
+}
+
+func check_ship_ast() {
+    if (flash > 0) { return; }
+    byte i = 0;
+    while (i < MAX_AST) {
+        if (ast_size[i] > 0) {
+            byte dx = abs_diff(ship_x + 4, ast_x[i]);
+            byte dy = abs_diff(ship_y + 4, ast_y[i]);
+            byte hr = 6;
+            if (ast_size[i] == 1) { hr = 11; }
+            if (dx < hr) {
+                if (dy < hr) {
+                    sfx_explode();
+                    flash = 50;
+                    lives = lives - 1;
+                    ship_x = 128;
+                    ship_y = 120;
+                    ship_vx = 128;
+                    ship_vy = 128;
+                    if (lives == 0) { alive = 0; }
+                    return;
+                }
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func draw_hud() {
+    byte lx = 8;
+    byte li = 0;
+    while (li < 3) {
+        byte si = li + 40;
+        if (lives > li) { sprite(si, lx, 12, T_HEART, 1); }
+        else { hide_sprite(si); }
+        lx = lx + 10;
+        li = li + 1;
+    }
+    byte d = score_lo;
+    byte tens = 0;
+    while (d >= 10) { d = d - 10; tens = tens + 1; }
+    sprite(43, 216, 12, score_hi + 48, 0);
+    sprite(44, 224, 12, tens + 48, 0);
+    sprite(45, 232, 12, d + 48, 0);
+}
+
+func clear_all_sprites() {
+    byte j = 0;
+    while (j < 50) { hide_sprite(j); j = j + 1; }
+}
+
+func init_game() {
+    alive = 1; score_lo = 0; score_hi = 0; lives = 3;
+    ship_x = 128; ship_y = 120; ship_dir = 0;
+    ship_vx = 128; ship_vy = 128;
+    flash = 0; fire_cool = 0; wave = 1; thrusting = 0;
+    byte i = 0;
+    while (i < MAX_AST) { ast_size[i] = 0; i = i + 1; }
+    i = 0;
+    while (i < MAX_BUL) { bul_life[i] = 0; i = i + 1; }
+    clear_all_sprites();
+    spawn_wave_ast();
+}
+
+func game_over_anim() {
+    byte t = 0;
+    while (t < 60) {
+        vblank();
+        if (t & 4) {
+            draw_multi(0, ship_x, ship_y, 91, 1);
+            sprite(2, ship_x + 4, ship_y + 4, T_EXPL1, 1);
+        } else {
+            hide_multi(0);
+            sprite(2, ship_x + 4, ship_y + 4, T_EXPL2, 0);
+        }
+        scroll(0, 0);
+        t = t + 1;
+    }
+    clear_all_sprites();
+}
+
+func main() {
+    ppu_off();
+    color(0, 0x0F, 0x10, 0x00, 0x30);
+    color(4, 0x0F, 0x10, 0x2C, 0x3C);
+    color(16, 0x0F, 0x21, 0x31, 0x30);
+    color(20, 0x0F, 0x06, 0x16, 0x27);
+    color(24, 0x0F, 0x08, 0x18, 0x28);
+    color(28, 0x0F, 0x1A, 0x2A, 0x3A);
+    bg_text(11, 4, ".");
+    bg_text(3, 7, ".");
+    bg_text(25, 9, ".");
+    bg_text(7, 12, ".");
+    bg_text(19, 15, ".");
+    bg_text(2, 18, ".");
+    bg_text(28, 20, ".");
+    bg_text(14, 22, ".");
+    bg_text(6, 25, ".");
+    bg_text(22, 27, ".");
+    enable_sound();
+    ppu_on();
+    ppu_off();
+    bg_text(7, 10, "A S T E R O I D S");
+    bg_text(8, 14, "B=THRUST A=FIRE");
+    bg_text(7, 16, "LEFT/RIGHT=ROTATE");
+    bg_text(9, 20, "PRESS START!");
+    ppu_on();
+    game_state = 0;
+
+    while (true) {
+        vblank();
+        frame = frame + 1;
+        byte pad = gamepad(0);
+        byte pressed = pad & (old_pad ^ 255);
+        old_pad = pad;
+
+        if (game_state == 0) {
+            if (pressed & BTN_START) {
+                ppu_off();
+                bg_text(7, 10, "                  ");
+                bg_text(8, 14, "                ");
+                bg_text(7, 16, "                  ");
+                bg_text(9, 20, "              ");
+                ppu_on();
+                init_game();
+                game_state = 1;
+            }
+        }
+        if (game_state == 1) {
+            if (pressed & BTN_LEFT) {
+                if (ship_dir == 0) { ship_dir = 7; }
+                else { ship_dir = ship_dir - 1; }
+            }
+            if (pressed & BTN_RIGHT) {
+                ship_dir = ship_dir + 1;
+                if (ship_dir > 7) { ship_dir = 0; }
+            }
+            thrusting = 0;
+            if (pad & BTN_B) {
+                thrusting = 1;
+                byte tf = frame & 3;
+                if (tf == 0) {
+                    byte tdx = thr_dx[ship_dir];
+                    byte tdy = thr_dy[ship_dir];
+                    ship_vx = ship_vx + tdx;
+                    ship_vy = ship_vy + tdy;
+                    if (ship_vx > 130) { if (ship_vx < 200) { ship_vx = 130; } }
+                    if (ship_vx < 126) { if (ship_vx > 50) { ship_vx = 126; } }
+                    if (ship_vy > 130) { if (ship_vy < 200) { ship_vy = 130; } }
+                    if (ship_vy < 126) { if (ship_vy > 50) { ship_vy = 126; } }
+                }
+            }
+            if (fire_cool > 0) { fire_cool = fire_cool - 1; }
+            if (pressed & BTN_A) {
+                if (fire_cool == 0) { fire_bullet(); fire_cool = FIRE_RATE; }
+            }
+            update_ship();
+            update_bullets();
+            update_asteroids();
+            check_bul_ast();
+            check_ship_ast();
+            draw_hud();
+            count_live_ast();
+            if (ast_count == 0) {
+                wave = wave + 1;
+                if (wave > 8) { wave = 8; }
+                spawn_wave_ast();
+            }
+            if (alive == 0) {
+                game_over_anim();
+                ppu_off();
+                bg_text(11, 13, "GAME OVER");
+                bg_text(9, 16, "PRESS START!");
+                ppu_on();
+                game_state = 2;
+            }
+        }
+        if (game_state == 2) {
+            if (pressed & BTN_START) {
+                ppu_off();
+                bg_text(11, 13, "         ");
+                bg_text(9, 16, "              ");
+                ppu_on();
+                init_game();
+                game_state = 1;
+            }
+        }
+        scroll(0, 0);
+    }
+}

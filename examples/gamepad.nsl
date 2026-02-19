@@ -1,0 +1,35 @@
+// gamepad.nsl — Moving a sprite with the D-pad
+
+tile 1 = "
+..XXXX..
+.XXXXXX.
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+.XXXXXX.
+..XXXX..
+";
+
+byte px = 120;
+byte py = 120;
+
+func main() {
+    ppu_off();
+    color(0, 0x0F, 0x30, 0x10, 0x00);
+    color(16, 0x0F, 0x16, 0x27, 0x30);
+    bg_text(8, 2, "MOVE WITH D-PAD");
+    ppu_on();
+
+    while (true) {
+        vblank();
+        byte pad = gamepad(0);
+        if (pad & BTN_UP)    { if (py > 8)   { py = py - 2; } }
+        if (pad & BTN_DOWN)  { if (py < 230) { py = py + 2; } }
+        if (pad & BTN_LEFT)  { if (px > 8)   { px = px - 2; } }
+        if (pad & BTN_RIGHT) { if (px < 248) { px = px + 2; } }
+
+        sprite(0, px, py, 1, 0);
+        scroll(0, 0);
+    }
+}

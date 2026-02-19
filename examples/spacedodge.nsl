@@ -1,0 +1,473 @@
+// =============================================
+//   S P A C E   D O D G E
+//   NesLang Demo
+//   Стрелки = движение, A = стрельба (очередь!)
+// =============================================
+
+// ===== ТАЙЛЫ =====
+
+// 1: корабль игрока
+tile 1 = "
+...XX...
+..XXXX..
+..XXXX..
+.XX##XX.
+XXXXXXXX
+XX.XX.XX
+X..XX..X
+...XX...
+";
+
+// 2: враг (череп)
+tile 2 = "
+..XXXX..
+.X.XX.X.
+.XXXXXX.
+.X.XX.X.
+..XXXX..
+...XX...
+..X..X..
+.X....X.
+";
+
+// 3: маленькая звёздочка
+tile 3 = "
+........
+........
+...X....
+..XXX...
+...X....
+........
+........
+........
+";
+
+// 4: сердце
+tile 4 = "
+........
+.XX..XX.
+XXXXXXXX
+XXXXXXXX
+.XXXXXX.
+..XXXX..
+...XX...
+........
+";
+
+// 5: большая звезда
+tile 5 = "
+........
+...X....
+...X....
+.XXXXX..
+...X....
+...X....
+........
+........
+";
+
+// 6: взрыв
+tile 6 = "
+.X....X.
+..X.XX..
+...XX...
+.XXXXXX.
+...XX...
+..X..X..
+.X....X.
+........
+";
+
+// 7: бонус (кристалл)
+tile 7 = "
+...XX...
+..XOOX..
+.XOOOOX.
+XOOOOOOX
+XOOOOOOX
+.XOOOOX.
+..XOOX..
+...XX...
+";
+
+// 8: пуля
+tile 8 = "
+...XX...
+..XXXX..
+..XXXX..
+...XX...
+........
+........
+........
+........
+";
+
+// ===== ПЕРЕМЕННЫЕ =====
+byte ship_x = 120;
+byte ship_y = 210;
+byte frame = 0;
+byte alive = 1;
+byte score = 0;
+byte lives = 3;
+byte flash = 0;
+byte difficulty = 0;
+
+// 8 врагов
+byte[8] enemy_x = { 30, 80, 130, 180, 50, 100, 150, 200 };
+byte[8] enemy_y = { 0, 220, 200, 180, 240, 160, 230, 210 };
+byte[8] enemy_spd = { 1, 1, 1, 1, 1, 1, 1, 1 };
+
+// 6 фоновых звёзд
+byte[6] star_x = { 20, 60, 110, 160, 200, 40 };
+byte[6] star_y = { 10, 50, 80, 30, 120, 150 };
+
+// 4 пули для очереди
+byte[4] bul_x = { 0, 0, 0, 0 };
+byte[4] bul_y = { 255, 255, 255, 255 };
+byte[4] bul_on = { 0, 0, 0, 0 };
+byte fire_cooldown = 0;
+
+const byte SHIP_TILE = 1;
+const byte ENEMY_TILE = 2;
+const byte STAR_TILE = 3;
+const byte HEART_TILE = 4;
+const byte BIG_STAR = 5;
+const byte EXPLODE_TILE = 6;
+const byte BULLET_TILE = 8;
+const byte FIRE_RATE = 6;
+
+// ===== ФУНКЦИИ =====
+
+func respawn_enemy(byte idx) {
+    byte rx = rand();
+    if (rx < 16) { rx = 16; }
+    if (rx > 232) { rx = 232; }
+    enemy_x[idx] = rx;
+
+    // Появляются наверху экрана с разбросом
+    enemy_y[idx] = 0;
+
+    byte rs = rand();
+    if (rs < 128) {
+        enemy_spd[idx] = 1;
+    } else {
+        enemy_spd[idx] = 2;
+    }
+}
+
+func update_enemies() {
+    byte i = 0;
+    while (i < 8) {
+        byte spd = enemy_spd[i];
+        byte ey = enemy_y[i];
+
+        // Движение: базовая скорость + маленькая добавка от сложности
+        // Двигаем каждый кадр, но скорость маленькая
+        ey = ey + spd;
+
+        // Сложность добавляет скорость раз в N кадров
+        if (difficulty > 0) {
+            byte dm = frame & 3;
+            if (dm == 0) {
+                ey = ey + 1;
+            }
+        }
+
+        enemy_y[i] = ey;
+
+        // Если вышел за экран — респавн + очко
+        if (ey > 240) {
+            respawn_enemy(i);
+            if (alive == 1) {
+                score = score + 1;
+                if (score == 15) { difficulty = 1; }
+                if (score == 30) { difficulty = 2; }
+                if (score == 50) { difficulty = 3; }
+            }
+        }
+
+        // Не рисуем если ещё не вошёл на экран
+        if (ey < 240) {
+            byte si = i + 1;
+            sprite(si, enemy_x[i], ey, ENEMY_TILE, 1);
+        }
+
+        i = i + 1;
+    }
+}
+
+func check_ship_collision() {
+    byte i = 0;
+    while (i < 8) {
+        byte ex = enemy_x[i];
+        byte ey = enemy_y[i];
+
+        // Пропускаем если за экраном
+        if (ey > 240) {
+            i = i + 1;
+        } else {
+            byte dx = 0;
+            if (ship_x > ex) { dx = ship_x - ex; }
+            else { dx = ex - ship_x; }
+
+            byte dy = 0;
+            if (ship_y > ey) { dy = ship_y - ey; }
+            else { dy = ey - ship_y; }
+
+            if (dx < 7) {
+                if (dy < 7) {
+                    sfx_hit();
+                    flash = 15;
+                    lives = lives - 1;
+                    respawn_enemy(i);
+                    if (lives == 0) {
+                        alive = 0;
+                        sfx_explode();
+                    }
+                }
+            }
+            i = i + 1;
+        }
+    }
+}
+
+func fire_bullet() {
+    // Найти свободную пулю
+    byte i = 0;
+    while (i < 4) {
+        if (bul_on[i] == 0) {
+            bul_on[i] = 1;
+            bul_x[i] = ship_x;
+            bul_y[i] = ship_y - 6;
+            sfx_jump();
+            return;
+        }
+        i = i + 1;
+    }
+}
+
+func update_bullets() {
+    byte i = 0;
+    while (i < 4) {
+        if (bul_on[i] == 1) {
+            byte by = bul_y[i];
+            if (by < 6) {
+                // Ушла за экран
+                bul_on[i] = 0;
+                byte si = i + 16;
+                hide_sprite(si);
+            } else {
+                by = by - 5;
+                bul_y[i] = by;
+                byte si = i + 16;
+                sprite(si, bul_x[i], by, BULLET_TILE, 3);
+            }
+        }
+        i = i + 1;
+    }
+}
+
+func check_bullet_hits() {
+    byte b = 0;
+    while (b < 4) {
+        if (bul_on[b] == 1) {
+            byte bx = bul_x[b];
+            byte by = bul_y[b];
+
+            byte i = 0;
+            while (i < 8) {
+                byte ex = enemy_x[i];
+                byte ey = enemy_y[i];
+
+                if (ey < 240) {
+                    byte dx = 0;
+                    if (bx > ex) { dx = bx - ex; }
+                    else { dx = ex - bx; }
+
+                    byte dy = 0;
+                    if (by > ey) { dy = by - ey; }
+                    else { dy = ey - by; }
+
+                    if (dx < 6) {
+                        if (dy < 6) {
+                            sfx_pickup();
+                            score = score + 3;
+                            respawn_enemy(i);
+                            bul_on[b] = 0;
+                            byte si = b + 16;
+                            hide_sprite(si);
+
+                            // Показать взрыв на месте врага (на кадр)
+                            byte esi = i + 1;
+                            sprite(esi, ex, ey, EXPLODE_TILE, 1);
+                            return;
+                        }
+                    }
+                }
+                i = i + 1;
+            }
+        }
+        b = b + 1;
+    }
+}
+
+func update_stars() {
+    byte i = 0;
+    while (i < 6) {
+        byte sy = star_y[i];
+        if (frame & 1) {
+            sy = sy + 1;
+        }
+        if (sy > 240) {
+            sy = 0;
+            star_x[i] = rand();
+        }
+        star_y[i] = sy;
+
+        byte si = i + 10;
+        byte tid = STAR_TILE;
+        if (i & 1) { tid = BIG_STAR; }
+        sprite(si, star_x[i], sy, tid, 2);
+
+        i = i + 1;
+    }
+}
+
+func draw_lives() {
+    if (lives > 0) { sprite(22, 8,  8, HEART_TILE, 0); }
+    else { hide_sprite(22); }
+    if (lives > 1) { sprite(23, 18, 8, HEART_TILE, 0); }
+    else { hide_sprite(23); }
+    if (lives > 2) { sprite(24, 28, 8, HEART_TILE, 0); }
+    else { hide_sprite(24); }
+}
+
+func game_over_anim() {
+    byte t = 0;
+    while (t < 60) {
+        vblank();
+        if (t & 4) {
+            sprite(0, ship_x, ship_y, EXPLODE_TILE, 0);
+        } else {
+            hide_sprite(0);
+        }
+        t = t + 1;
+    }
+    byte j = 0;
+    while (j < 42) {
+        hide_sprite(j);
+        j = j + 1;
+    }
+}
+
+// ===== MAIN =====
+func main() {
+    ppu_off();
+
+    // Палитра фона: чёрный космос
+    color(0, 0x0F, 0x00, 0x10, 0x30);
+    // Палитра 0: корабль (бело-голубой)
+    color(16, 0x0F, 0x21, 0x31, 0x30);
+    // Палитра 1: враги (красные)
+    color(20, 0x0F, 0x06, 0x16, 0x26);
+    // Палитра 2: звёзды (жёлтые)
+    color(24, 0x0F, 0x17, 0x27, 0x38);
+    // Палитра 3: пули (зелёные)
+    color(28, 0x0F, 0x1A, 0x2A, 0x3A);
+
+    enable_sound();
+    ppu_on();
+
+    // ===== GAME LOOP =====
+    while (true) {
+        vblank();
+        frame = frame + 1;
+
+        if (alive == 0) {
+            game_over_anim();
+            // Рестарт
+            ship_x = 120;
+            ship_y = 210;
+            lives = 3;
+            score = 0;
+            alive = 1;
+            difficulty = 0;
+            flash = 0;
+            fire_cooldown = 0;
+            // Очистить пули
+            bul_on[0] = 0; bul_on[1] = 0;
+            bul_on[2] = 0; bul_on[3] = 0;
+            bul_y[0] = 255; bul_y[1] = 255;
+            bul_y[2] = 255; bul_y[3] = 255;
+            // Респавн врагов далеко
+            respawn_enemy(0);
+            respawn_enemy(1);
+            respawn_enemy(2);
+            respawn_enemy(3);
+            respawn_enemy(4);
+            respawn_enemy(5);
+            respawn_enemy(6);
+            respawn_enemy(7);
+        }
+
+        // === Управление ===
+        byte pad = gamepad(0);
+
+        byte spd = 3;
+        if (pad & BTN_RIGHT) { ship_x = ship_x + spd; }
+        if (pad & BTN_LEFT)  { ship_x = ship_x - spd; }
+        if (pad & BTN_DOWN)  { ship_y = ship_y + 2; }
+        if (pad & BTN_UP)    { ship_y = ship_y - 2; }
+
+        if (ship_x < 4) { ship_x = 4; }
+        if (ship_x > 248) { ship_x = 248; }
+        if (ship_y < 32) { ship_y = 32; }
+        if (ship_y > 224) { ship_y = 224; }
+
+        // === Стрельба очередью ===
+        if (fire_cooldown > 0) {
+            fire_cooldown = fire_cooldown - 1;
+        }
+        if (pad & BTN_A) {
+            if (fire_cooldown == 0) {
+                fire_bullet();
+                fire_cooldown = FIRE_RATE;
+            }
+        }
+
+        // === Обновляем мир ===
+        update_bullets();
+        update_enemies();
+        update_stars();
+        check_ship_collision();
+        check_bullet_hits();
+
+        // === Рисуем корабль ===
+        if (flash > 0) {
+            flash = flash - 1;
+            if (flash & 2) {
+                hide_sprite(0);
+            } else {
+                sprite(0, ship_x, ship_y, SHIP_TILE, 0);
+            }
+        } else {
+            sprite(0, ship_x, ship_y, SHIP_TILE, 0);
+        }
+
+        draw_lives();
+
+        // Счёт звёздочками справа (до 10)
+        byte sx = 232;
+        byte s = 0;
+        while (s < 10) {
+            byte si = s + 30;
+            if (score > s) {
+                sprite(si, sx, 8, STAR_TILE, 2);
+            } else {
+                hide_sprite(si);
+            }
+            sx = sx - 10;
+            s = s + 1;
+        }
+    }
+}

@@ -1,0 +1,826 @@
+// =============================================
+//   DENDY COMMANDER v2.0
+//   Norton Commander for NES
+//
+//   D-PAD=navigate  L/R=panels
+//   A=open/enter    B=back
+//   SELECT=info     START=run
+//
+//   Includes working SNAKE game!
+// =============================================
+
+// ===== CUSTOM TILES =====
+
+tile 13 = "
+.X......
+.XX.....
+.XXX....
+.XXXX...
+.XXX....
+.XX.....
+.X......
+........
+";
+
+tile 16 = "
+.XXXXX..
+XXXXXXX.
+XXXXXXX.
+XXXXXXX.
+XXXXXXX.
+XXXXXXX.
+XXXXXXX.
+........
+";
+
+tile 17 = "
+..XXXXX.
+..X.XXX.
+..X..XX.
+..X....X
+..X....X
+..X....X
+..XXXXXX
+........
+";
+
+tile 18 = "
+.XXXXXX.
+X.XXXX.X
+X......X
+XXXXXXXX
+X......X
+X.XXXX.X
+.XXXXXX.
+........
+";
+
+tile 19 = "
+..XXXX..
+.XXXXXX.
+XXXXXXX.
+XXXXX.X.
+XXXXX.X.
+XXXXXXX.
+.XXXXXX.
+..XXXX..
+";
+
+tile 20 = "
+.XXXXXX.
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+.XXXXXX.
+";
+
+tile 21 = "
+....X...
+...XXX..
+..XXXX..
+.XXXXXX.
+.XXXXXX.
+.XXXXXX.
+..XXXX..
+........
+";
+
+tile 22 = "
+XXXXXXXX
+X......X
+X.XXXX.X
+X.X....X
+X.XXX..X
+X.X....X
+X.XXXX.X
+XXXXXXXX
+";
+
+// ===== CONSTANTS =====
+const byte H_LINE = 1;
+const byte V_LINE = 2;
+const byte TL = 3;
+const byte TR = 4;
+const byte BL = 5;
+const byte BR = 6;
+const byte LTEE = 7;
+const byte RTEE = 8;
+const byte TTEE = 9;
+const byte BTEE = 10;
+const byte CROSS = 11;
+const byte BLOCK = 12;
+const byte ARROW = 13;
+const byte FOLDER = 16;
+const byte FILEI = 17;
+const byte DISKI = 18;
+const byte SHEAD = 19;
+const byte SBODY = 20;
+const byte FOODT = 21;
+const byte EXEI = 22;
+
+const byte ROOT_CNT = 8;
+const byte GAME_CNT = 7;
+const byte MUSIC_CNT = 5;
+const byte SAVE_CNT = 4;
+
+// ===== GLOBAL VARIABLES =====
+byte mode = 0;
+byte frame = 0;
+byte old_pad = 0;
+
+byte cursor_y = 0;
+byte active_panel = 0;
+byte dir_left = 0;
+byte dir_right = 0;
+
+byte[30] snk_x;
+byte[30] snk_y;
+byte snk_head = 0;
+byte snk_tail = 0;
+byte snk_len = 0;
+byte snk_dir = 1;
+byte snk_tick = 0;
+byte snk_speed = 7;
+byte snk_alive = 0;
+byte snk_score = 0;
+byte snk_grow = 0;
+byte food_x = 15;
+byte food_y = 14;
+byte new_hx = 0;
+byte new_hy = 0;
+
+// ============ NC DRAWING ============
+
+func clear_screen() {
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) {
+        bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0);
+        j = j + 1;
+    }
+}
+
+func draw_hline(byte x, byte y, byte len) {
+    bg_addr(x, y);
+    byte i = 0;
+    while (i < len) { bg_byte(H_LINE); i = i + 1; }
+}
+
+func draw_vlines(byte y) {
+    bg_addr(0, y);  bg_byte(V_LINE);
+    bg_addr(15, y); bg_byte(V_LINE);
+    bg_addr(16, y); bg_byte(V_LINE);
+    bg_addr(31, y); bg_byte(V_LINE);
+}
+
+func draw_nc_frame() {
+    bg_addr(0, 1);  bg_byte(TL);
+    draw_hline(1, 1, 14);
+    bg_addr(15, 1); bg_byte(TTEE);
+    bg_addr(16, 1); bg_byte(TTEE);
+    draw_hline(17, 1, 14);
+    bg_addr(31, 1); bg_byte(TR);
+
+    bg_addr(0, 3);  bg_byte(LTEE);
+    draw_hline(1, 3, 14);
+    bg_addr(15, 3); bg_byte(CROSS);
+    bg_addr(16, 3); bg_byte(CROSS);
+    draw_hline(17, 3, 14);
+    bg_addr(31, 3); bg_byte(RTEE);
+
+    draw_vlines(2);
+    byte r = 4;
+    while (r < 26) { draw_vlines(r); r = r + 1; }
+
+    bg_addr(0, 26);  bg_byte(LTEE);
+    draw_hline(1, 26, 14);
+    bg_addr(15, 26); bg_byte(CROSS);
+    bg_addr(16, 26); bg_byte(CROSS);
+    draw_hline(17, 26, 14);
+    bg_addr(31, 26); bg_byte(RTEE);
+
+    draw_vlines(27);
+
+    bg_addr(0, 28);  bg_byte(BL);
+    draw_hline(1, 28, 14);
+    bg_addr(15, 28); bg_byte(BTEE);
+    bg_addr(16, 28); bg_byte(BTEE);
+    draw_hline(17, 28, 14);
+    bg_addr(31, 28); bg_byte(BR);
+}
+
+func draw_nc_headers() {
+    bg_text(2, 0, "DENDY COMMANDER V2.0");
+    bg_text(1, 2, " NAME       SIZE");
+    bg_text(17, 2, "NAME       SIZE");
+    bg_text(1, 29, "A=OPEN B=BACK SEL=INFO");
+}
+
+func clear_panel(byte x) {
+    byte r = 4;
+    while (r < 26) {
+        bg_addr(x, r);
+        bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0);
+        bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0);
+        bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0);
+        bg_byte(0); bg_byte(0);
+        r = r + 1;
+    }
+}
+
+func draw_root(byte x) {
+    bg_addr(x, 4); bg_byte(FOLDER);
+    bg_text(x + 1, 4,  "GAMES      <D>");
+    bg_addr(x, 5); bg_byte(FOLDER);
+    bg_text(x + 1, 5,  "MUSIC      <D>");
+    bg_addr(x, 6); bg_byte(FOLDER);
+    bg_text(x + 1, 6,  "SAVES      <D>");
+    bg_addr(x, 7); bg_byte(FILEI);
+    bg_text(x + 1, 7,  "README    2048");
+    bg_addr(x, 8); bg_byte(FILEI);
+    bg_text(x + 1, 8,  "CONFIG     512");
+    bg_addr(x, 9); bg_byte(FILEI);
+    bg_text(x + 1, 9,  "BOOT.SYS  4096");
+    bg_addr(x, 10); bg_byte(DISKI);
+    bg_text(x + 1, 10, "AUTOEXEC   128");
+    bg_addr(x, 11); bg_byte(EXEI);
+    bg_text(x + 1, 11, "COMMAND   8192");
+}
+
+func draw_games(byte x) {
+    bg_addr(x, 4); bg_byte(FOLDER);
+    bg_text(x + 1, 4,  "..            ");
+    bg_addr(x, 5); bg_byte(EXEI);
+    bg_text(x + 1, 5,  "SNAKE.NES  40K");
+    bg_addr(x, 6); bg_byte(EXEI);
+    bg_text(x + 1, 6,  "MARIO.NES 256K");
+    bg_addr(x, 7); bg_byte(EXEI);
+    bg_text(x + 1, 7,  "CONTRA    128K");
+    bg_addr(x, 8); bg_byte(EXEI);
+    bg_text(x + 1, 8,  "TETRIS.NES 32K");
+    bg_addr(x, 9); bg_byte(EXEI);
+    bg_text(x + 1, 9,  "ZELDA.NES 512K");
+    bg_addr(x, 10); bg_byte(EXEI);
+    bg_text(x + 1, 10, "PACMAN.NES 16K");
+}
+
+func draw_music(byte x) {
+    bg_addr(x, 4); bg_byte(FOLDER);
+    bg_text(x + 1, 4,  "..            ");
+    bg_addr(x, 5); bg_byte(FILEI);
+    bg_text(x + 1, 5,  "TRACK01.NSF 4K");
+    bg_addr(x, 6); bg_byte(FILEI);
+    bg_text(x + 1, 6,  "TRACK02.NSF 4K");
+    bg_addr(x, 7); bg_byte(FILEI);
+    bg_text(x + 1, 7,  "CHIPTUNE.NSF8K");
+    bg_addr(x, 8); bg_byte(FILEI);
+    bg_text(x + 1, 8,  "MEGAMAN.NSF 2K");
+}
+
+func draw_saves(byte x) {
+    bg_addr(x, 4); bg_byte(FOLDER);
+    bg_text(x + 1, 4,  "..            ");
+    bg_addr(x, 5); bg_byte(FILEI);
+    bg_text(x + 1, 5,  "SAVE01.SAV  8K");
+    bg_addr(x, 6); bg_byte(FILEI);
+    bg_text(x + 1, 6,  "SAVE02.SAV  8K");
+    bg_addr(x, 7); bg_byte(FILEI);
+    bg_text(x + 1, 7,  "SAVE03.SAV  8K");
+}
+
+func draw_panel(byte panel, byte dir) {
+    byte x = 1;
+    if (panel == 1) { x = 17; }
+    clear_panel(x);
+    if (dir == 0) { draw_root(x); }
+    if (dir == 1) { draw_games(x); }
+    if (dir == 2) { draw_music(x); }
+    if (dir == 3) { draw_saves(x); }
+    byte fx = 1;
+    if (panel == 1) { fx = 17; }
+    if (dir == 0) { bg_text(fx, 27, "C:\\  640K FREE"); }
+    if (dir == 1) { bg_text(fx, 27, "C:\\GAMES      "); }
+    if (dir == 2) { bg_text(fx, 27, "C:\\MUSIC      "); }
+    if (dir == 3) { bg_text(fx, 27, "C:\\SAVES      "); }
+}
+
+func draw_nc_attrs() {
+    byte ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 0, 0x55);
+        ax = ax + 1;
+    }
+    ax = 0;
+    while (ax < 8) {
+        bg_attr(ax, 7, 0xAA);
+        ax = ax + 1;
+    }
+}
+
+func draw_full_nc() {
+    clear_screen();
+    draw_nc_frame();
+    draw_nc_headers();
+    draw_panel(0, dir_left);
+    draw_panel(1, dir_right);
+    draw_nc_attrs();
+}
+
+func get_dir_count(byte dir) {
+    if (dir == 0) { return ROOT_CNT; }
+    if (dir == 1) { return GAME_CNT; }
+    if (dir == 2) { return MUSIC_CNT; }
+    return SAVE_CNT;
+}
+
+func update_cursor() {
+    byte sx = 1;
+    if (active_panel == 1) { sx = 129; }
+    byte sy = cursor_y + cursor_y;
+    sy = sy + sy;
+    sy = sy + sy;
+    sy = sy + 31;
+    sprite(0, sx, sy, ARROW, 0);
+}
+
+func show_popup(byte row) {
+    bg_addr(5, 11); bg_byte(TL);
+    draw_hline(6, 11, 20);
+    bg_addr(26, 11); bg_byte(TR);
+    byte py = 12;
+    while (py < 16) {
+        bg_addr(5, py); bg_byte(V_LINE);
+        bg_addr(26, py); bg_byte(V_LINE);
+        py = py + 1;
+    }
+    bg_addr(5, 16); bg_byte(BL);
+    draw_hline(6, 16, 20);
+    bg_addr(26, 16); bg_byte(BR);
+
+    bg_text(6, 12, "                    ");
+    bg_text(6, 13, "                    ");
+    bg_text(6, 14, "                    ");
+    bg_text(6, 15, "                    ");
+
+    if (row == 2) {
+        bg_text(7, 12, " SUPER MARIO NES  ");
+        bg_text(7, 13, "NEED EXPANSION PAK");
+    }
+    if (row == 3) {
+        bg_text(7, 12, "  CONTRA  1988    ");
+        bg_text(7, 13, "  ACCESS DENIED   ");
+    }
+    if (row == 4) {
+        bg_text(7, 12, " TETRIS CLASSIC   ");
+        bg_text(7, 13, " FILE CORRUPTED!  ");
+    }
+    if (row == 5) {
+        bg_text(7, 12, " ZELDA NES  512K  ");
+        bg_text(7, 13, "NOT ENOUGH MEMORY ");
+    }
+    if (row == 6) {
+        bg_text(7, 12, " PACMAN  ARCADE   ");
+        bg_text(7, 13, " DISK READ ERROR! ");
+    }
+    bg_text(7, 15, "  PRESS B: BACK   ");
+}
+
+func show_info() {
+    byte dir = dir_left;
+    if (active_panel == 1) { dir = dir_right; }
+
+    bg_addr(4, 10); bg_byte(TL);
+    draw_hline(5, 10, 22);
+    bg_addr(27, 10); bg_byte(TR);
+    byte iy = 11;
+    while (iy < 18) {
+        bg_addr(4, iy); bg_byte(V_LINE);
+        bg_text(5, iy, "                      ");
+        bg_addr(27, iy); bg_byte(V_LINE);
+        iy = iy + 1;
+    }
+    bg_addr(4, 18); bg_byte(BL);
+    draw_hline(5, 18, 22);
+    bg_addr(27, 18); bg_byte(BR);
+
+    bg_text(8, 10, " FILE INFO ");
+    bg_text(6, 12, "NAME:");
+    bg_text(6, 14, "TYPE:");
+    bg_text(6, 16, "DATE: 2026-02-17");
+    bg_text(8, 17, " PRESS B: BACK");
+
+    if (dir == 0) {
+        if (cursor_y == 0) { bg_text(12, 12, "GAMES"); bg_text(12, 14, "DIR"); }
+        if (cursor_y == 1) { bg_text(12, 12, "MUSIC"); bg_text(12, 14, "DIR"); }
+        if (cursor_y == 2) { bg_text(12, 12, "SAVES"); bg_text(12, 14, "DIR"); }
+        if (cursor_y == 3) { bg_text(12, 12, "README"); bg_text(12, 14, "TXT"); }
+        if (cursor_y == 4) { bg_text(12, 12, "CONFIG"); bg_text(12, 14, "SYS"); }
+        if (cursor_y == 5) { bg_text(12, 12, "BOOT.SYS"); bg_text(12, 14, "SYS"); }
+        if (cursor_y == 6) { bg_text(12, 12, "AUTOEXEC"); bg_text(12, 14, "BAT"); }
+        if (cursor_y == 7) { bg_text(12, 12, "COMMAND"); bg_text(12, 14, "EXE"); }
+    }
+    if (dir == 1) {
+        if (cursor_y == 1) { bg_text(12, 12, "SNAKE"); bg_text(12, 14, "NES ROM"); }
+        if (cursor_y == 2) { bg_text(12, 12, "MARIO"); bg_text(12, 14, "NES ROM"); }
+        if (cursor_y == 3) { bg_text(12, 12, "CONTRA"); bg_text(12, 14, "NES ROM"); }
+        if (cursor_y == 4) { bg_text(12, 12, "TETRIS"); bg_text(12, 14, "NES ROM"); }
+        if (cursor_y == 5) { bg_text(12, 12, "ZELDA"); bg_text(12, 14, "NES ROM"); }
+        if (cursor_y == 6) { bg_text(12, 12, "PACMAN"); bg_text(12, 14, "NES ROM"); }
+    }
+}
+
+// ============ TEXT VIEWER ============
+
+func draw_viewer() {
+    clear_screen();
+    bg_addr(0, 0); bg_byte(TL);
+    draw_hline(1, 0, 30);
+    bg_addr(31, 0); bg_byte(TR);
+    bg_text(8, 0, " README.TXT ");
+    byte r = 1;
+    while (r < 29) {
+        bg_addr(0, r); bg_byte(V_LINE);
+        bg_addr(31, r); bg_byte(V_LINE);
+        r = r + 1;
+    }
+    bg_addr(0, 29); bg_byte(BL);
+    draw_hline(1, 29, 30);
+    bg_addr(31, 29); bg_byte(BR);
+
+    bg_text(2, 2,  "DENDY COMMANDER V2.0");
+    bg_text(2, 3,  "(C) 2026 NESLANG CORP");
+    bg_text(2, 5,  "WELCOME TO YOUR FILE");
+    bg_text(2, 6,  "MANAGER FOR NES!");
+    bg_text(2, 8,  "FEATURES:");
+    bg_text(2, 9,  "- TWO PANEL BROWSER");
+    bg_text(2, 10, "- FILE INFORMATION");
+    bg_text(2, 11, "- BUILT-IN SNAKE GAME");
+    bg_text(2, 12, "- TEXT FILE VIEWER");
+    bg_text(2, 14, "CONTROLS:");
+    bg_text(2, 15, "D-PAD  = NAVIGATE");
+    bg_text(2, 16, "A      = OPEN/ENTER");
+    bg_text(2, 17, "B      = GO BACK");
+    bg_text(2, 18, "SELECT = FILE INFO");
+    bg_text(2, 20, "MEMORY: 640K");
+    bg_text(2, 21, "THAT OUGHT TO BE");
+    bg_text(2, 22, "ENOUGH FOR ANYBODY!");
+    bg_text(2, 24, "SYSTEM: NES 6502 CPU");
+    bg_text(2, 25, "PPU: RICOH 2C02");
+    bg_text(2, 27, "   PRESS B: BACK    ");
+}
+
+// ============ SNAKE GAME ============
+
+func snake_draw_score() {
+    bg_text(1, 0, " SCORE:");
+    byte s = snk_score;
+    byte d2 = 0;
+    byte d1 = 0;
+    while (s >= 100) { d2 = d2 + 1; s = s - 100; }
+    while (s >= 10) { d1 = d1 + 1; s = s - 10; }
+    bg_addr(8, 0);
+    bg_byte(48 + d2);
+    bg_byte(48 + d1);
+    bg_byte(48 + s);
+}
+
+func snake_spawn_food() {
+    food_x = rand();
+    food_x = food_x & 31;
+    if (food_x < 2) { food_x = 2; }
+    if (food_x > 29) { food_x = 29; }
+    food_y = rand();
+    food_y = food_y & 31;
+    if (food_y < 2) { food_y = 2; }
+    if (food_y > 27) { food_y = 27; }
+}
+
+func snake_init() {
+    snk_score = 0;
+    snk_alive = 1;
+    snk_dir = 1;
+    snk_tick = 0;
+    snk_speed = 7;
+    snk_grow = 0;
+    snk_len = 3;
+    snk_tail = 0;
+    snk_head = 2;
+
+    snk_x[0] = 13; snk_y[0] = 14;
+    snk_x[1] = 14; snk_y[1] = 14;
+    snk_x[2] = 15; snk_y[2] = 14;
+
+    snake_spawn_food();
+
+    ppu_off();
+    clear_screen();
+
+    // Border
+    bg_addr(0, 0); bg_byte(TL);
+    byte bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(TR);
+    byte by = 1;
+    while (by < 29) {
+        bg_addr(0, by);  bg_byte(V_LINE);
+        bg_addr(31, by); bg_byte(V_LINE);
+        by = by + 1;
+    }
+    bg_addr(0, 29); bg_byte(BL);
+    bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(BR);
+
+    bg_text(10, 0, " S N A K E ");
+    bg_text(22, 0, " B=QUIT ");
+
+    // Draw initial snake
+    bg_addr(13, 14); bg_byte(SBODY);
+    bg_addr(14, 14); bg_byte(SBODY);
+    bg_addr(15, 14); bg_byte(SHEAD);
+    bg_addr(food_x, food_y); bg_byte(FOODT);
+
+    snake_draw_score();
+
+    // Palette: green for game area
+    byte ax = 0;
+    byte ay = 0;
+    while (ay < 8) {
+        ax = 0;
+        while (ax < 8) {
+            bg_attr(ax, ay, 0xFF);
+            ax = ax + 1;
+        }
+        ay = ay + 1;
+    }
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 0, 0x55); ax = ax + 1; }
+
+    ppu_on();
+}
+
+func snake_check_self() {
+    byte ci = snk_tail;
+    while (ci != snk_head) {
+        if (snk_x[ci] == new_hx) {
+            if (snk_y[ci] == new_hy) {
+                snk_alive = 0;
+            }
+        }
+        ci = ci + 1;
+        if (ci == 30) { ci = 0; }
+    }
+}
+
+func snake_move() {
+    byte hx = snk_x[snk_head];
+    byte hy = snk_y[snk_head];
+
+    if (snk_dir == 0) { hy = hy - 1; }
+    if (snk_dir == 1) { hx = hx + 1; }
+    if (snk_dir == 2) { hy = hy + 1; }
+    if (snk_dir == 3) { hx = hx - 1; }
+
+    new_hx = hx;
+    new_hy = hy;
+
+    if (hx < 1) { snk_alive = 0; return; }
+    if (hx > 30) { snk_alive = 0; return; }
+    if (hy < 1) { snk_alive = 0; return; }
+    if (hy > 28) { snk_alive = 0; return; }
+
+    snake_check_self();
+    if (snk_alive == 0) { return; }
+
+    // Old head becomes body
+    bg_addr(snk_x[snk_head], snk_y[snk_head]);
+    bg_byte(SBODY);
+
+    // Advance head in ring buffer
+    snk_head = snk_head + 1;
+    if (snk_head == 30) { snk_head = 0; }
+    snk_x[snk_head] = hx;
+    snk_y[snk_head] = hy;
+
+    // Draw new head
+    bg_addr(hx, hy);
+    bg_byte(SHEAD);
+
+    // Check food
+    if (hx == food_x) {
+        if (hy == food_y) {
+            snk_score = snk_score + 1;
+            snk_grow = snk_grow + 3;
+            sfx_pickup();
+            snake_spawn_food();
+            bg_addr(food_x, food_y);
+            bg_byte(FOODT);
+            if (snk_speed > 3) {
+                byte sc = snk_score & 7;
+                if (sc == 0) { snk_speed = snk_speed - 1; }
+            }
+        }
+    }
+
+    // Grow or erase tail
+    if (snk_grow > 0) {
+        snk_grow = snk_grow - 1;
+        snk_len = snk_len + 1;
+        if (snk_len > 29) { snk_len = 29; }
+    } else {
+        bg_addr(snk_x[snk_tail], snk_y[snk_tail]);
+        bg_byte(0);
+        snk_tail = snk_tail + 1;
+        if (snk_tail == 30) { snk_tail = 0; }
+    }
+
+    snake_draw_score();
+}
+
+func snake_game_over() {
+    byte t = 0;
+    while (t < 60) {
+        vblank();
+        if (t == 1) { sfx_explode(); }
+        t = t + 1;
+        scroll(0, 0);
+    }
+    bg_text(10, 14, " GAME  OVER! ");
+    bg_text(10, 16, " B = BACK    ");
+    bg_text(10, 17, " A = RETRY   ");
+
+    while (true) {
+        vblank();
+        byte pad = gamepad(0);
+        byte pressed = pad & (old_pad ^ 255);
+        old_pad = pad;
+        if (pressed & BTN_B) { mode = 0; return; }
+        if (pressed & BTN_A) { snake_init(); return; }
+        scroll(0, 0);
+    }
+}
+
+func snake_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (snk_alive == 0) { snake_game_over(); return; }
+
+    if (pressed & BTN_B) { mode = 0; return; }
+
+    if (pressed & BTN_UP)    { if (snk_dir != 2) { snk_dir = 0; } }
+    if (pressed & BTN_RIGHT) { if (snk_dir != 3) { snk_dir = 1; } }
+    if (pressed & BTN_DOWN)  { if (snk_dir != 0) { snk_dir = 2; } }
+    if (pressed & BTN_LEFT)  { if (snk_dir != 1) { snk_dir = 3; } }
+
+    snk_tick = snk_tick + 1;
+    if (snk_tick >= snk_speed) {
+        snk_tick = 0;
+        snake_move();
+    }
+    scroll(0, 0);
+}
+
+// ============ NC UPDATE ============
+
+func nc_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    byte dir = dir_left;
+    if (active_panel == 1) { dir = dir_right; }
+    byte max_f = get_dir_count(dir);
+
+    if (mode == 3) {
+        if (pressed & BTN_B) {
+            mode = 0;
+            ppu_off(); draw_full_nc(); ppu_on();
+        }
+        scroll(0, 0);
+        return;
+    }
+
+    if (pressed & BTN_DOWN) {
+        if (cursor_y + 1 < max_f) { cursor_y = cursor_y + 1; sfx_jump(); }
+    }
+    if (pressed & BTN_UP) {
+        if (cursor_y > 0) { cursor_y = cursor_y - 1; sfx_jump(); }
+    }
+    if (pressed & BTN_LEFT) {
+        if (active_panel == 1) { active_panel = 0; cursor_y = 0; sfx_pickup(); }
+    }
+    if (pressed & BTN_RIGHT) {
+        if (active_panel == 0) { active_panel = 1; cursor_y = 0; sfx_pickup(); }
+    }
+
+    if (pressed & BTN_A) {
+        if (dir == 0) {
+            if (cursor_y == 0) {
+                if (active_panel == 0) { dir_left = 1; } else { dir_right = 1; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 1); ppu_on(); sfx_pickup();
+            }
+            if (cursor_y == 1) {
+                if (active_panel == 0) { dir_left = 2; } else { dir_right = 2; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 2); ppu_on(); sfx_pickup();
+            }
+            if (cursor_y == 2) {
+                if (active_panel == 0) { dir_left = 3; } else { dir_right = 3; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 3); ppu_on(); sfx_pickup();
+            }
+            if (cursor_y == 3) {
+                mode = 2;
+                ppu_off(); draw_viewer(); ppu_on(); sfx_pickup();
+            }
+        }
+        if (dir == 1) {
+            if (cursor_y == 0) {
+                if (active_panel == 0) { dir_left = 0; } else { dir_right = 0; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 0); ppu_on(); sfx_hit();
+            }
+            if (cursor_y == 1) {
+                mode = 1;
+                hide_sprite(0);
+                snake_init();
+                sfx_pickup();
+            }
+            if (cursor_y > 1) {
+                mode = 3;
+                ppu_off(); show_popup(cursor_y); ppu_on(); sfx_explode();
+            }
+        }
+        if (dir == 2) {
+            if (cursor_y == 0) {
+                if (active_panel == 0) { dir_left = 0; } else { dir_right = 0; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 0); ppu_on(); sfx_hit();
+            }
+        }
+        if (dir == 3) {
+            if (cursor_y == 0) {
+                if (active_panel == 0) { dir_left = 0; } else { dir_right = 0; }
+                cursor_y = 0;
+                ppu_off(); draw_panel(active_panel, 0); ppu_on(); sfx_hit();
+            }
+        }
+    }
+
+    if (pressed & BTN_B) {
+        if (dir > 0) {
+            if (active_panel == 0) { dir_left = 0; } else { dir_right = 0; }
+            cursor_y = 0;
+            ppu_off(); draw_panel(active_panel, 0); ppu_on(); sfx_hit();
+        }
+    }
+
+    if (pressed & BTN_SELECT) {
+        mode = 3;
+        ppu_off(); show_info(); ppu_on();
+    }
+
+    update_cursor();
+    scroll(0, 0);
+}
+
+func viewer_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+    if (pressed & BTN_B) {
+        mode = 0;
+        ppu_off(); draw_full_nc(); ppu_on(); sfx_hit();
+    }
+    scroll(0, 0);
+}
+
+// ============ MAIN ============
+
+func main() {
+    ppu_off();
+    color(0, 0x01, 0x30, 0x21, 0x28);
+    color(4, 0x01, 0x2C, 0x30, 0x28);
+    color(8, 0x01, 0x30, 0x10, 0x21);
+    color(12, 0x01, 0x2A, 0x30, 0x16);
+    color(16, 0x01, 0x30, 0x28, 0x21);
+    enable_sound();
+    draw_full_nc();
+    update_cursor();
+    ppu_on();
+
+    while (true) {
+        vblank();
+        frame = frame + 1;
+        if (mode == 0) { nc_update(); }
+        if (mode == 3) { nc_update(); }
+        if (mode == 1) { snake_update(); }
+        if (mode == 2) { viewer_update(); }
+    }
+}

@@ -1,0 +1,1093 @@
+// =============================================
+//   NES GAME COLLECTION
+//   Multi-game cartridge with animated menu
+//   
+//   D-PAD = select    A/START = play
+// =============================================
+
+// ===== DECORATIVE TILES =====
+
+// 23: diamond pattern (bg fill)
+tile 23 = "
+...XX...
+..X..X..
+.X....X.
+X......X
+.X....X.
+..X..X..
+...XX...
+........
+";
+
+// 24: dots pattern
+tile 24 = "
+........
+..X..X..
+........
+........
+........
+..X..X..
+........
+........
+";
+
+// 25: wave top
+tile 25 = "
+........
+........
+...XX...
+..X..X..
+.X....X.
+X......X
+XXXXXXXX
+........
+";
+
+// 26: small star
+tile 26 = "
+........
+...X....
+..XXX...
+.XXXXX..
+..XXX...
+...X....
+........
+........
+";
+
+// 27: big sparkle
+tile 27 = "
+...X....
+...X....
+.X.X.X..
+..XXX...
+.X.X.X..
+...X....
+...X....
+........
+";
+
+// 28: controller icon
+tile 28 = "
+........
+.XXXXXX.
+XXXXXXXX
+XX.XX.XX
+XXXXXXXX
+X.XXXX.X
+.XXXXXX.
+........
+";
+
+// 29: trophy
+tile 29 = "
+.XXXXXX.
+X.XXXX.X
+.XXXXXX.
+..XXXX..
+...XX...
+...XX...
+..XXXX..
+.XXXXXX.
+";
+
+// 30: music note
+tile 30 = "
+....XX..
+....XXX.
+....XX.X
+....XX..
+...XX...
+..XX....
+.XX.....
+........
+";
+
+// 31: heart
+tile 31 = "
+........
+.XX..XX.
+XXXXXXXX
+XXXXXXXX
+.XXXXXX.
+..XXXX..
+...XX...
+........
+";
+
+// Game tiles
+// 19: snake head
+tile 19 = "
+..XXXX..
+.XXXXXX.
+XXXXXXX.
+XXXXX.X.
+XXXXX.X.
+XXXXXXX.
+.XXXXXX.
+..XXXX..
+";
+// 20: snake body
+tile 20 = "
+.XXXXXX.
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+.XXXXXX.
+";
+// 21: food
+tile 21 = "
+....X...
+...XXX..
+..XXXX..
+.XXXXXX.
+.XXXXXX.
+.XXXXXX.
+..XXXX..
+........
+";
+// 16: paddle (horizontal block)
+tile 16 = "
+XXXXXXXX
+XXXXXXXX
+XX.XX.XX
+XXXXXXXX
+XXXXXXXX
+........
+........
+........
+";
+// 17: ball
+tile 17 = "
+...XX...
+..XXXX..
+.XXXXXX.
+.XXXXXX.
+..XXXX..
+...XX...
+........
+........
+";
+// 18: brick
+tile 18 = "
+XXXXXXXX
+X......X
+XXXXXXXX
+........
+XXXXXXXX
+....X..X
+XXXXXXXX
+........
+";
+// 13: arrow cursor
+tile 13 = "
+.X......
+.XX.....
+.XXX....
+.XXXX...
+.XXXXX..
+.XXX....
+.XX.....
+.X......
+";
+
+// ===== CONSTANTS =====
+const byte H_LINE = 1;
+const byte V_LINE = 2;
+const byte TL = 3;
+const byte TR = 4;
+const byte BL = 5;
+const byte BR = 6;
+const byte DIAMOND = 23;
+const byte DOTS = 24;
+const byte WAVE = 25;
+const byte SMSTAR = 26;
+const byte SPARKLE = 27;
+const byte CTRL = 28;
+const byte TROPHY = 29;
+const byte MUSIC = 30;
+const byte HEART = 31;
+const byte SHEAD = 19;
+const byte SBODY = 20;
+const byte FOODT = 21;
+const byte PADDLE = 16;
+const byte BALL = 17;
+const byte BRICK = 18;
+const byte ARROW = 13;
+
+// ===== VARIABLES =====
+byte mode = 0;       // 0=menu 1=snake 2=pong 3=breakout 4=dodge
+byte prev_mode = 0;
+byte frame = 0;
+byte old_pad = 0;
+byte menu_sel = 0;   // 0-3
+byte anim_frame = 0;
+
+// Snake vars
+byte[30] snk_x;
+byte[30] snk_y;
+byte snk_head = 0;
+byte snk_tail = 0;
+byte snk_len = 0;
+byte snk_dir = 1;
+byte snk_tick = 0;
+byte snk_speed = 7;
+byte snk_alive = 0;
+byte snk_score = 0;
+byte snk_grow = 0;
+byte food_x = 15;
+byte food_y = 14;
+byte new_hx = 0;
+byte new_hy = 0;
+
+// Pong vars
+byte ball_x = 128;
+byte ball_y = 120;
+byte ball_dx = 2;
+byte ball_dy = 1;
+byte pad1_y = 108;
+byte pad2_y = 108;
+byte score1 = 0;
+byte score2 = 0;
+byte pong_serve = 30;
+
+// Breakout vars
+byte brk_x = 120;
+byte brk_bx = 128;
+byte brk_by = 200;
+byte brk_bdx = 2;
+byte brk_bdy = 254;
+byte brk_score = 0;
+byte brk_alive = 0;
+byte[20] brk_row;
+
+// Dodge vars
+byte dg_x = 120;
+byte dg_score = 0;
+byte dg_alive = 0;
+byte[8] dg_ex;
+byte[8] dg_ey;
+byte[8] dg_es;
+
+// ============ MENU BACKGROUND ============
+
+func fill_bg_pattern() {
+    // Fill entire nametable with decorative pattern
+    byte y = 0;
+    while (y < 30) {
+        bg_addr(0, y);
+        byte x = 0;
+        while (x < 32) {
+            // Create checkerboard of diamonds and dots
+            byte pat = x + y;
+            pat = pat & 3;
+            if (pat == 0) { bg_byte(DIAMOND); }
+            if (pat == 1) { bg_byte(DOTS); }
+            if (pat == 2) { bg_byte(DIAMOND); }
+            if (pat == 3) { bg_byte(DOTS); }
+            x = x + 1;
+        }
+        y = y + 1;
+    }
+}
+
+func set_menu_attrs() {
+    // Create colorful mosaic with attribute table
+    // Each attr byte covers 4x4 tiles
+    // Palette: 0=blue/white 1=cyan 2=green 3=red
+    byte ay = 0;
+    while (ay < 8) {
+        byte ax = 0;
+        while (ax < 8) {
+            byte val = ax + ay;
+            val = val & 3;
+            byte attr = 0;
+            // Spread palettes across quadrants
+            if (val == 0) { attr = 0x00; }
+            if (val == 1) { attr = 0x55; }
+            if (val == 2) { attr = 0xAA; }
+            if (val == 3) { attr = 0xFF; }
+            bg_attr(ax, ay, attr);
+            ax = ax + 1;
+        }
+        ay = ay + 1;
+    }
+    // Override center area for menu text readability
+    // Rows 2-5 (attr rows 1-2) center columns (attr cols 1-6)
+    bg_attr(1, 1, 0x00);
+    bg_attr(2, 1, 0x00);
+    bg_attr(3, 1, 0x00);
+    bg_attr(4, 1, 0x00);
+    bg_attr(5, 1, 0x00);
+    bg_attr(6, 1, 0x00);
+
+    // Title area palette 1 (cyan)
+    bg_attr(2, 0, 0x55);
+    bg_attr(3, 0, 0x55);
+    bg_attr(4, 0, 0x55);
+    bg_attr(5, 0, 0x55);
+
+    // Menu items area - palette 0
+    bg_attr(2, 2, 0x00);
+    bg_attr(3, 2, 0x00);
+    bg_attr(4, 2, 0x00);
+    bg_attr(5, 2, 0x00);
+    bg_attr(2, 3, 0x00);
+    bg_attr(3, 3, 0x00);
+    bg_attr(4, 3, 0x00);
+    bg_attr(5, 3, 0x00);
+
+    // Bottom credits - palette 2
+    bg_attr(2, 6, 0xAA);
+    bg_attr(3, 6, 0xAA);
+    bg_attr(4, 6, 0xAA);
+    bg_attr(5, 6, 0xAA);
+}
+
+func draw_menu_box() {
+    // Title box
+    bg_addr(5, 2); bg_byte(TL);
+    byte tx = 6;
+    while (tx < 26) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(TR);
+
+    bg_addr(5, 3); bg_byte(V_LINE);
+    bg_text(6, 3,  "                    ");
+    bg_addr(26, 3); bg_byte(V_LINE);
+
+    bg_addr(5, 4); bg_byte(V_LINE);
+    bg_text(6, 4,  "                    ");
+    bg_addr(26, 4); bg_byte(V_LINE);
+
+    bg_addr(5, 5); bg_byte(BL);
+    tx = 6;
+    while (tx < 26) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(BR);
+
+    // Title text with decorations
+    bg_addr(7, 3); bg_byte(SPARKLE);
+    bg_text(9, 3, "NES  GAME  BOX");
+    bg_addr(24, 3); bg_byte(SPARKLE);
+    bg_text(8, 4, "4 GAMES IN 1 CART");
+
+    // Menu box
+    bg_addr(6, 8); bg_byte(TL);
+    tx = 7;
+    while (tx < 25) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(TR);
+
+    byte my = 9;
+    while (my < 22) {
+        bg_addr(6, my); bg_byte(V_LINE);
+        bg_text(7, my, "                  ");
+        bg_addr(25, my); bg_byte(V_LINE);
+        my = my + 1;
+    }
+
+    bg_addr(6, 22); bg_byte(BL);
+    tx = 7;
+    while (tx < 25) { bg_byte(H_LINE); tx = tx + 1; }
+    bg_byte(BR);
+
+    // Menu items with icons
+    bg_text(8, 9, "SELECT YOUR GAME");
+
+    bg_addr(9, 11); bg_byte(SHEAD);
+    bg_text(11, 11, "SNAKE");
+    bg_text(17, 11, "CLASSIC");
+
+    bg_addr(9, 13); bg_byte(BALL);
+    bg_text(11, 13, "PONG");
+    bg_text(17, 13, "2 PLAY");
+
+    bg_addr(9, 15); bg_byte(BRICK);
+    bg_text(11, 15, "BREAKOUT");
+    bg_text(20, 15, "HIT!");
+
+    bg_addr(9, 17); bg_byte(SMSTAR);
+    bg_text(11, 17, "DODGE");
+    bg_text(17, 17, "SURVIVE");
+
+    // Divider line
+    bg_addr(7, 19); 
+    tx = 7;
+    while (tx < 25) { bg_byte(H_LINE); tx = tx + 1; }
+
+    bg_text(8, 20, "A = PLAY   B = BACK");
+
+    // Bottom decorations
+    bg_addr(8, 25); bg_byte(CTRL);
+    bg_text(10, 25, "PRESS START!");
+    bg_addr(23, 25); bg_byte(CTRL);
+
+    bg_addr(6, 27); bg_byte(HEART);
+    bg_text(8, 27, "NESLANG COMPILER");
+    bg_addr(25, 27); bg_byte(HEART);
+
+    bg_addr(10, 28); bg_byte(MUSIC);
+    bg_text(12, 28, "2026");
+    bg_addr(17, 28); bg_byte(TROPHY);
+}
+
+func draw_menu() {
+    fill_bg_pattern();
+    draw_menu_box();
+    set_menu_attrs();
+}
+
+func update_menu_cursor() {
+    byte sy = 11 + menu_sel;
+    sy = sy + menu_sel;   // *2 spacing
+    sy = sy + sy;
+    sy = sy + sy;
+    sy = sy + sy;         // now *8 for pixels
+    sy = sy - 1;
+    sprite(0, 56, sy, ARROW, 0);
+
+    // Animate sparkle sprites around selection
+    byte sparkle_y = sy + 3;
+    byte blink = anim_frame & 8;
+    if (blink) {
+        sprite(1, 192, sparkle_y, SPARKLE, 1);
+    } else {
+        sprite(1, 192, sparkle_y, SMSTAR, 2);
+    }
+}
+
+func menu_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_DOWN) {
+        if (menu_sel < 3) { menu_sel = menu_sel + 1; sfx_jump(); }
+    }
+    if (pressed & BTN_UP) {
+        if (menu_sel > 0) { menu_sel = menu_sel - 1; sfx_jump(); }
+    }
+
+    if (pressed & BTN_A) {
+        sfx_pickup();
+        hide_sprite(0);
+        hide_sprite(1);
+        if (menu_sel == 0) { mode = 1; snake_start(); }
+        if (menu_sel == 1) { mode = 2; pong_start(); }
+        if (menu_sel == 2) { mode = 3; brk_start(); }
+        if (menu_sel == 3) { mode = 4; dodge_start(); }
+    }
+    if (pressed & BTN_START) {
+        sfx_pickup();
+        hide_sprite(0);
+        hide_sprite(1);
+        if (menu_sel == 0) { mode = 1; snake_start(); }
+        if (menu_sel == 1) { mode = 2; pong_start(); }
+        if (menu_sel == 2) { mode = 3; brk_start(); }
+        if (menu_sel == 3) { mode = 4; dodge_start(); }
+    }
+
+    update_menu_cursor();
+    scroll(0, 0);
+}
+
+// ============ SNAKE ============
+
+func snake_draw_score() {
+    byte s = snk_score;
+    byte d1 = 0;
+    while (s >= 10) { d1 = d1 + 1; s = s - 10; }
+    bg_addr(8, 0);
+    bg_byte(48 + d1);
+    bg_byte(48 + s);
+}
+
+func snake_spawn() {
+    food_x = rand();
+    food_x = food_x & 31;
+    if (food_x < 2) { food_x = 2; }
+    if (food_x > 29) { food_x = 29; }
+    food_y = rand();
+    food_y = food_y & 31;
+    if (food_y < 2) { food_y = 2; }
+    if (food_y > 27) { food_y = 27; }
+}
+
+func snake_start() {
+    snk_score = 0; snk_alive = 1; snk_dir = 1;
+    snk_tick = 0; snk_speed = 7; snk_grow = 0;
+    snk_len = 3; snk_tail = 0; snk_head = 2;
+    snk_x[0] = 13; snk_y[0] = 14;
+    snk_x[1] = 14; snk_y[1] = 14;
+    snk_x[2] = 15; snk_y[2] = 14;
+    snake_spawn();
+
+    ppu_off();
+    // Clear
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) { bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0); j = j + 1; }
+
+    // Border
+    bg_addr(0, 0); bg_byte(TL);
+    byte bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(TR);
+    byte by = 1;
+    while (by < 29) {
+        bg_addr(0, by); bg_byte(V_LINE);
+        bg_addr(31, by); bg_byte(V_LINE);
+        by = by + 1;
+    }
+    bg_addr(0, 29); bg_byte(BL);
+    bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(BR);
+
+    bg_text(1, 0, " SCORE:");
+    bg_text(22, 0, " B=BACK ");
+    snake_draw_score();
+    bg_addr(13, 14); bg_byte(SBODY);
+    bg_addr(14, 14); bg_byte(SBODY);
+    bg_addr(15, 14); bg_byte(SHEAD);
+    bg_addr(food_x, food_y); bg_byte(FOODT);
+
+    byte ax = 0;
+    byte ay = 0;
+    while (ay < 8) { ax = 0; while (ax < 8) { bg_attr(ax, ay, 0xFF); ax = ax + 1; } ay = ay + 1; }
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 0, 0x55); ax = ax + 1; }
+    ppu_on();
+}
+
+func snake_check() {
+    byte ci = snk_tail;
+    while (ci != snk_head) {
+        if (snk_x[ci] == new_hx) {
+            if (snk_y[ci] == new_hy) { snk_alive = 0; }
+        }
+        ci = ci + 1;
+        if (ci == 30) { ci = 0; }
+    }
+}
+
+func snake_move() {
+    byte hx = snk_x[snk_head];
+    byte hy = snk_y[snk_head];
+    if (snk_dir == 0) { hy = hy - 1; }
+    if (snk_dir == 1) { hx = hx + 1; }
+    if (snk_dir == 2) { hy = hy + 1; }
+    if (snk_dir == 3) { hx = hx - 1; }
+    new_hx = hx; new_hy = hy;
+    if (hx < 1) { snk_alive = 0; return; }
+    if (hx > 30) { snk_alive = 0; return; }
+    if (hy < 1) { snk_alive = 0; return; }
+    if (hy > 28) { snk_alive = 0; return; }
+    snake_check();
+    if (snk_alive == 0) { return; }
+
+    bg_addr(snk_x[snk_head], snk_y[snk_head]); bg_byte(SBODY);
+    snk_head = snk_head + 1;
+    if (snk_head == 30) { snk_head = 0; }
+    snk_x[snk_head] = hx; snk_y[snk_head] = hy;
+    bg_addr(hx, hy); bg_byte(SHEAD);
+
+    if (hx == food_x) {
+        if (hy == food_y) {
+            snk_score = snk_score + 1;
+            snk_grow = snk_grow + 3;
+            sfx_pickup();
+            snake_spawn();
+            bg_addr(food_x, food_y); bg_byte(FOODT);
+            if (snk_speed > 3) {
+                byte sc = snk_score & 7;
+                if (sc == 0) { snk_speed = snk_speed - 1; }
+            }
+        }
+    }
+    if (snk_grow > 0) {
+        snk_grow = snk_grow - 1;
+        snk_len = snk_len + 1;
+        if (snk_len > 29) { snk_len = 29; }
+    } else {
+        bg_addr(snk_x[snk_tail], snk_y[snk_tail]); bg_byte(0);
+        snk_tail = snk_tail + 1;
+        if (snk_tail == 30) { snk_tail = 0; }
+    }
+    snake_draw_score();
+}
+
+func snake_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_B) { mode = 0; return; }
+
+    if (snk_alive == 0) {
+        bg_text(10, 14, " GAME  OVER! ");
+        bg_text(10, 16, " A=RETRY B=MENU");
+        if (pressed & BTN_A) { snake_start(); return; }
+        scroll(0, 0);
+        return;
+    }
+
+    if (pressed & BTN_UP)    { if (snk_dir != 2) { snk_dir = 0; } }
+    if (pressed & BTN_RIGHT) { if (snk_dir != 3) { snk_dir = 1; } }
+    if (pressed & BTN_DOWN)  { if (snk_dir != 0) { snk_dir = 2; } }
+    if (pressed & BTN_LEFT)  { if (snk_dir != 1) { snk_dir = 3; } }
+
+    snk_tick = snk_tick + 1;
+    if (snk_tick >= snk_speed) { snk_tick = 0; snake_move(); }
+    scroll(0, 0);
+}
+
+// ============ PONG ============
+
+func pong_draw_scores() {
+    bg_addr(12, 1);
+    bg_byte(48 + score1);
+    bg_byte(45);  // dash
+    bg_byte(48 + score2);
+}
+
+func pong_start() {
+    ball_x = 128; ball_y = 120;
+    ball_dx = 2; ball_dy = 1;
+    pad1_y = 108; pad2_y = 108;
+    score1 = 0; score2 = 0;
+    pong_serve = 30;
+    ppu_off();
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) { bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0); j = j + 1; }
+
+    // Border
+    bg_addr(0, 0); bg_byte(TL);
+    byte bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(TR);
+    byte by = 1;
+    while (by < 29) {
+        bg_addr(0, by); bg_byte(V_LINE);
+        bg_addr(31, by); bg_byte(V_LINE);
+        by = by + 1;
+    }
+    bg_addr(0, 29); bg_byte(BL);
+    bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(BR);
+
+    // Center dashed line
+    by = 2;
+    while (by < 29) {
+        if (by & 1) { bg_addr(15, by); bg_byte(V_LINE); }
+        by = by + 1;
+    }
+
+    bg_text(5, 0, " PONG ");
+    bg_text(22, 0, " B=BACK ");
+    bg_text(4, 1, "P1:UP/DN");
+    bg_text(20, 1, "P2:A/B");
+    pong_draw_scores();
+
+    byte ax = 0;
+    byte ay = 0;
+    while (ay < 8) { ax = 0; while (ax < 8) { bg_attr(ax, ay, 0x00); ax = ax + 1; } ay = ay + 1; }
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 0, 0x55); ax = ax + 1; }
+
+    ppu_on();
+}
+
+func pong_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_B) { 
+        byte si = 0;
+        while (si < 8) { hide_sprite(si); si = si + 1; }
+        mode = 0; return; 
+    }
+
+    // P1: D-pad up/down
+    if (pad & BTN_UP) { if (pad1_y > 20) { pad1_y = pad1_y - 3; } }
+    if (pad & BTN_DOWN) { if (pad1_y < 208) { pad1_y = pad1_y + 3; } }
+
+    // P2: A=up B=down (for single controller)
+    if (pad & BTN_A) { if (pad2_y > 20) { pad2_y = pad2_y - 3; } }
+    if (pad & BTN_START) { if (pad2_y < 208) { pad2_y = pad2_y + 3; } }
+
+    // Draw paddles (3 sprites each)
+    sprite(2, 16, pad1_y, PADDLE, 0);
+    sprite(3, 16, pad1_y + 8, PADDLE, 0);
+    sprite(4, 16, pad1_y + 16, PADDLE, 0);
+    sprite(5, 232, pad2_y, PADDLE, 0);
+    sprite(6, 232, pad2_y + 8, PADDLE, 0);
+    sprite(7, 232, pad2_y + 16, PADDLE, 0);
+
+    // Serve delay
+    if (pong_serve > 0) {
+        pong_serve = pong_serve - 1;
+        sprite(0, ball_x, ball_y, BALL, 1);
+        scroll(0, 0);
+        return;
+    }
+
+    // Move ball
+    ball_x = ball_x + ball_dx;
+    ball_y = ball_y + ball_dy;
+
+    // Top/bottom bounce
+    if (ball_y < 18) { ball_dy = 0 - ball_dy; ball_y = 18; sfx_jump(); }
+    if (ball_y > 224) { ball_dy = 0 - ball_dy; ball_y = 224; sfx_jump(); }
+
+    // Left paddle collision
+    if (ball_x < 24) {
+        byte dy1 = 0;
+        if (ball_y > pad1_y) { dy1 = ball_y - pad1_y; }
+        else { dy1 = pad1_y - ball_y; }
+        if (dy1 < 20) {
+            ball_dx = 0 - ball_dx;
+            ball_x = 24;
+            sfx_hit();
+        }
+    }
+
+    // Right paddle collision
+    if (ball_x > 228) {
+        byte dy2 = 0;
+        if (ball_y > pad2_y) { dy2 = ball_y - pad2_y; }
+        else { dy2 = pad2_y - ball_y; }
+        if (dy2 < 20) {
+            ball_dx = 0 - ball_dx;
+            ball_x = 228;
+            sfx_hit();
+        }
+    }
+
+    // Score
+    if (ball_x < 8) {
+        score2 = score2 + 1;
+        sfx_explode();
+        ball_x = 128; ball_y = 120;
+        ball_dx = 2; ball_dy = 1;
+        pong_serve = 30;
+        ppu_off();
+        pong_draw_scores();
+        ppu_on();
+    }
+    if (ball_x > 244) {
+        score1 = score1 + 1;
+        sfx_explode();
+        ball_x = 128; ball_y = 120;
+        ball_dx = 254; ball_dy = 1;
+        pong_serve = 30;
+        ppu_off();
+        pong_draw_scores();
+        ppu_on();
+    }
+
+    sprite(0, ball_x, ball_y, BALL, 1);
+    scroll(0, 0);
+}
+
+// ============ BREAKOUT ============
+
+func brk_draw_bricks() {
+    byte r = 0;
+    while (r < 5) {
+        byte c = 0;
+        byte ty = r + 3;
+        bg_addr(1, ty);
+        while (c < 15) {
+            byte idx = r + r + r + r;
+            idx = idx + c;
+            if (idx < 20) {
+                if (brk_row[idx] == 1) {
+                    bg_byte(BRICK); bg_byte(BRICK);
+                } else {
+                    bg_byte(0); bg_byte(0);
+                }
+            }
+            c = c + 1;
+        }
+        r = r + 1;
+    }
+}
+
+func brk_start() {
+    brk_x = 120; brk_bx = 128; brk_by = 200;
+    brk_bdx = 2; brk_bdy = 254;
+    brk_score = 0; brk_alive = 1;
+
+    byte i = 0;
+    while (i < 20) { brk_row[i] = 1; i = i + 1; }
+
+    ppu_off();
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) { bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0); j = j + 1; }
+
+    bg_addr(0, 0); bg_byte(TL);
+    byte bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(TR);
+    byte by = 1;
+    while (by < 29) {
+        bg_addr(0, by); bg_byte(V_LINE);
+        bg_addr(31, by); bg_byte(V_LINE);
+        by = by + 1;
+    }
+    bg_addr(0, 29); bg_byte(BL);
+    bx = 1;
+    while (bx < 31) { bg_byte(H_LINE); bx = bx + 1; }
+    bg_byte(BR);
+
+    bg_text(3, 0, " BREAKOUT ");
+    bg_text(22, 0, " B=BACK ");
+
+    brk_draw_bricks();
+
+    byte ax = 0;
+    byte ay = 0;
+    while (ay < 8) { ax = 0; while (ax < 8) { bg_attr(ax, ay, 0x00); ax = ax + 1; } ay = ay + 1; }
+    // Brick rows - palette 1 (red)
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 0, 0x55); bg_attr(ax, 1, 0xAA); ax = ax + 1; }
+
+    ppu_on();
+}
+
+func brk_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_B) {
+        hide_sprite(0); hide_sprite(1); hide_sprite(2); hide_sprite(3);
+        mode = 0; return;
+    }
+
+    if (brk_alive == 0) {
+        bg_text(10, 14, " GAME  OVER! ");
+        bg_text(10, 16, " A=RETRY B=MENU");
+        if (pressed & BTN_A) { brk_start(); return; }
+        scroll(0, 0);
+        return;
+    }
+
+    // Move paddle
+    if (pad & BTN_LEFT) { if (brk_x > 16) { brk_x = brk_x - 4; } }
+    if (pad & BTN_RIGHT) { if (brk_x < 216) { brk_x = brk_x + 4; } }
+
+    // Paddle sprites (4 wide)
+    sprite(1, brk_x, 216, PADDLE, 0);
+    sprite(2, brk_x + 8, 216, PADDLE, 0);
+    sprite(3, brk_x + 16, 216, PADDLE, 0);
+
+    // Move ball
+    brk_bx = brk_bx + brk_bdx;
+    brk_by = brk_by + brk_bdy;
+
+    // Wall bounces
+    if (brk_bx < 12) { brk_bdx = 0 - brk_bdx; brk_bx = 12; sfx_jump(); }
+    if (brk_bx > 240) { brk_bdx = 0 - brk_bdx; brk_bx = 240; sfx_jump(); }
+    if (brk_by < 12) { brk_bdy = 0 - brk_bdy; brk_by = 12; sfx_jump(); }
+
+    // Ball falls below paddle
+    if (brk_by > 228) {
+        brk_alive = 0;
+        sfx_explode();
+        scroll(0, 0);
+        return;
+    }
+
+    // Paddle collision
+    if (brk_by > 208) {
+        if (brk_by < 220) {
+            byte pdx = 0;
+            if (brk_bx > brk_x) { pdx = brk_bx - brk_x; }
+            else { pdx = brk_x - brk_bx; }
+            if (pdx < 20) {
+                brk_bdy = 0 - brk_bdy;
+                brk_by = 208;
+                sfx_hit();
+            }
+        }
+    }
+
+    // Brick collision
+    if (brk_by < 64) {
+        if (brk_by > 20) {
+            byte brick_r = 0;
+            byte tmp_br = brk_by - 24;
+            while (tmp_br >= 8) { tmp_br = tmp_br - 8; brick_r = brick_r + 1; }
+            if (brick_r < 5) {
+                byte brick_c = 0;
+                byte tmp_bc = brk_bx - 8;
+                while (tmp_bc >= 16) { tmp_bc = tmp_bc - 16; brick_c = brick_c + 1; }
+                if (brick_c < 15) {
+                    byte bidx = brick_r + brick_r + brick_r + brick_r;
+                    bidx = bidx + brick_c;
+                    if (bidx < 20) {
+                        if (brk_row[bidx] == 1) {
+                            brk_row[bidx] = 0;
+                            brk_bdy = 0 - brk_bdy;
+                            brk_score = brk_score + 1;
+                            sfx_pickup();
+                            ppu_off();
+                            brk_draw_bricks();
+                            ppu_on();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sprite(0, brk_bx, brk_by, BALL, 1);
+    scroll(0, 0);
+}
+
+// ============ DODGE ============
+
+func dodge_start() {
+    dg_x = 120; dg_score = 0; dg_alive = 1;
+    byte i = 0;
+    while (i < 8) {
+        dg_ex[i] = rand();
+        dg_ey[i] = rand();
+        dg_ey[i] = dg_ey[i] & 127;
+        dg_es[i] = 1;
+        byte rs = rand();
+        if (rs > 170) { dg_es[i] = 2; }
+        i = i + 1;
+    }
+    ppu_off();
+    bg_addr(0, 0);
+    byte j = 0;
+    while (j < 240) { bg_byte(0); bg_byte(0); bg_byte(0); bg_byte(0); j = j + 1; }
+    bg_text(4, 0, " DODGE ");
+    bg_text(22, 0, " B=BACK ");
+    byte ax = 0;
+    byte ay = 0;
+    while (ay < 8) { ax = 0; while (ax < 8) { bg_attr(ax, ay, 0x00); ax = ax + 1; } ay = ay + 1; }
+    ax = 0;
+    while (ax < 8) { bg_attr(ax, 0, 0x55); ax = ax + 1; }
+    ppu_on();
+}
+
+func dodge_update() {
+    byte pad = gamepad(0);
+    byte pressed = pad & (old_pad ^ 255);
+    old_pad = pad;
+
+    if (pressed & BTN_B) {
+        byte si = 0;
+        while (si < 12) { hide_sprite(si); si = si + 1; }
+        mode = 0; return;
+    }
+
+    if (dg_alive == 0) {
+        bg_text(10, 14, " GAME  OVER! ");
+        bg_text(10, 16, " A=RETRY B=MENU");
+        if (pressed & BTN_A) { dodge_start(); return; }
+        scroll(0, 0);
+        return;
+    }
+
+    if (pad & BTN_LEFT)  { if (dg_x > 4) { dg_x = dg_x - 3; } }
+    if (pad & BTN_RIGHT) { if (dg_x < 248) { dg_x = dg_x + 3; } }
+
+    sprite(0, dg_x, 216, SHEAD, 0);
+
+    // Score display
+    byte s = dg_score;
+    byte d1 = 0;
+    while (s >= 10) { d1 = d1 + 1; s = s - 10; }
+    bg_addr(12, 0);
+    bg_byte(48 + d1);
+    bg_byte(48 + s);
+
+    byte i = 0;
+    while (i < 8) {
+        byte ey = dg_ey[i];
+        ey = ey + dg_es[i];
+        dg_ey[i] = ey;
+
+        if (ey > 240) {
+            dg_ex[i] = rand();
+            dg_ey[i] = 0;
+            byte rs = rand();
+            dg_es[i] = 1;
+            if (rs > 128) { dg_es[i] = 2; }
+            if (dg_score > 10) {
+                if (rs > 200) { dg_es[i] = 3; }
+            }
+            dg_score = dg_score + 1;
+        }
+
+        byte si = i + 1;
+        sprite(si, dg_ex[i], ey, SMSTAR, 1);
+
+        // Collision
+        byte dx = 0;
+        if (dg_x > dg_ex[i]) { dx = dg_x - dg_ex[i]; }
+        else { dx = dg_ex[i] - dg_x; }
+        byte dy = 0;
+        if (216 > ey) { dy = 216 - ey; }
+        else { dy = ey - 216; }
+        if (dx < 7) { if (dy < 7) { dg_alive = 0; sfx_explode(); } }
+
+        i = i + 1;
+    }
+    scroll(0, 0);
+}
+
+// ============ MAIN ============
+
+func main() {
+    ppu_off();
+    // BG palettes
+    color(0, 0x01, 0x30, 0x21, 0x28);  // P0: dark blue/white/lt blue/yellow
+    color(4, 0x01, 0x2C, 0x30, 0x38);  // P1: dark blue/cyan/white/gold
+    color(8, 0x01, 0x16, 0x30, 0x2A);  // P2: dark blue/red/white/green
+    color(12, 0x01, 0x2A, 0x30, 0x12); // P3: dark blue/green/white/blue
+
+    // Sprite palettes
+    color(16, 0x01, 0x30, 0x28, 0x21); // SP0: white/yellow/lt blue
+    color(20, 0x01, 0x16, 0x30, 0x28); // SP1: red/white/yellow
+    color(24, 0x01, 0x2A, 0x3A, 0x30); // SP2: green/lt green/white
+
+    enable_sound();
+    draw_menu();
+    ppu_on();
+
+    while (true) {
+        vblank();
+        frame = frame + 1;
+        anim_frame = anim_frame + 1;
+
+        if (mode == 0) {
+            menu_update();
+        }
+        if (mode == 1) { snake_update(); }
+        if (mode == 2) { pong_update(); }
+        if (mode == 3) { brk_update(); }
+        if (mode == 4) { dodge_update(); }
+
+        // Return to menu: redraw if came from a game
+        if (mode == 0) {
+            if (prev_mode > 0) {
+                ppu_off();
+                draw_menu();
+                ppu_on();
+                prev_mode = 0;
+            }
+        }
+        if (mode > 0) { prev_mode = mode; }
+    }
+}
