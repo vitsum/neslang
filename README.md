@@ -102,13 +102,6 @@ NesLang ships with 10+ example games ranging from a 14-line hello world to a 1,2
 
 Pre-built `.nes` ROMs for all examples are included in the `examples/` folder — try them out immediately in an emulator.
 
-### Sprite Preview
-
-The fighter example features multi-tile characters with full animation sets:
-
-<p align="center">
-  <img src="docs/sprites_preview.png" alt="Street Fury character sprites" width="500">
-</p>
 
 ## Language at a Glance
 
